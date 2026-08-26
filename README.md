@@ -9,7 +9,7 @@ answer sits.
 
 | | |
 | --- | --- |
-| **Live URL** | _add after deploying — see [Deploying](#deploying)_ |
+| **Live URL** | **https://vedaai-assessment-rose.vercel.app** |
 | **Repository** | https://github.com/aayusharmaaa/vedaai-assessment |
 | **AI model** | Google Gemini (free tier), tried in order: `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-flash-lite-latest` |
 | **Stack** | Next.js 15 · TypeScript · Tailwind v4 · no database, no auth |
@@ -146,19 +146,19 @@ leaves those questions ungraded rather than sinking the run.
 
 ## Accuracy
 
-Measured on a real end-to-end run against the live API, using the bundled sample as
-ground truth (the sample is generated with known-correct boxes, so this is a genuine
-comparison rather than a vibe check):
+Measured on the **deployed app**, using the bundled sample as ground truth (the sample
+is generated with known-correct boxes, so this is a genuine comparison rather than a
+vibe check). 7 model calls, ~17k tokens, 56 seconds:
 
 ```
 1.       answered   label     pages=[1]     1/1
 2.       answered   label     pages=[1]     1/1
 3.       unanswered none      pages=[]      0/1   <- correctly skipped
 4.       answered   label     pages=[1,2]   3/3   <- spans two pages
-5.       answered   label     pages=[2]     2/3
+5.       answered   label     pages=[2]     1.5/3 <- partial credit
 6.       answered   label     pages=[2]     3/3   <- answered before Q5
-7. (a)   answered   label     pages=[3]     3/3   <- sub-parts kept separate
-7. (b)   answered   label     pages=[3]     2/2
+7 (a)    answered   label     pages=[3]     3/3   <- sub-parts kept separate
+7 (b)    answered   label     pages=[3]     2/2
 8.       answered   label     pages=[4]     5/5
 9.       answered   label     pages=[3]     3/3
 10.      unanswered none      pages=[]      0/3   <- correctly skipped
