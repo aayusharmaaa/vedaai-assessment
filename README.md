@@ -12,7 +12,7 @@ answer sits.
 | **Live URL** | **https://vedaai-assessment-rose.vercel.app** |
 | **Repository** | https://github.com/aayusharmaaa/vedaai-assessment |
 | **AI model** | Google Gemini (free tier), tried in order: `gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-flash-lite-latest` |
-| **Stack** | Next.js 15 · TypeScript · Tailwind v4 · no database, no auth |
+| **Stack** | Next.js 15 · TypeScript · Tailwind v4 · npm-workspaces monorepo · no database, no auth |
 
 ---
 
@@ -38,11 +38,14 @@ button walks the entire pipeline on bundled data with zero API calls.
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Dev server |
+| `npm run dev` | Dev server (`apps/web`) |
 | `npm run build` | Production build |
 | `npm run build:check` | Build into a throwaway dir (safe while `dev` is running) |
-| `npm test` | 33 tests — mapping, extraction and API failover |
+| `npm test` | 33 tests in `packages/core` — mapping, extraction and API failover |
 | `npm run sample` | Regenerate the bundled sample paper, sheet and result |
+| `npm run quota` | Probe live quota across every key and model |
+
+All commands run from the repo root and delegate to the right workspace.
 
 ---
 
@@ -331,36 +334,46 @@ on the Node.js runtime. No other configuration is needed.
 ## Project structure
 
 ```
-src/
-  app/
-    page.tsx                     phase machine: upload -> processing -> review
-    api/extract-questions/       stage 1
-    api/extract-answers/         stage 2 (one page per request)
-    api/analyze/                 stages 3 and 4: mapping, then grading
-    api/status/                  reports key/model availability to the client
-  components/
-    AppShell.tsx                 sidebar + top bar
-    UploadScreen.tsx             dual dropzone, validation, page counts
-    ProcessingScreen.tsx         staged progress
-    ReviewScreen.tsx             summary bar + two panels + mobile tabs
-    QuestionList.tsx             questions, filters, grades, feedback
-    AnswerViewer.tsx             page viewer, zoom, region highlighting
-    ArtworkImage.tsx             image with an inline-SVG fallback
-  lib/
-    pipeline.ts                  client-side stage orchestration
-    pdf.ts                       pdf.js / image rasterisation
-    gemini.ts                    REST client, (model x key) failover, token accounting
-    prompts.ts                   all four prompts
-    mapping.ts                   deterministic label matching + page stitching
-    normalize.ts                 model output -> domain model, with clamping
-    types.ts                     domain model
-scripts/
+apps/
+  web/                           the Next.js interface
+    src/app/                     routes + API routes
+      page.tsx                   phase machine: upload -> processing -> review
+      api/extract-questions/     stage 1
+      api/extract-answers/       stage 2 (one page per request)
+      api/analyze/               stages 3 and 4: mapping, then grading
+      api/status/                reports key/model availability to the client
+    src/components/              AppShell, Upload, Processing, Review,
+                                 QuestionList, AnswerViewer, ArtworkImage
+    src/lib/                     browser-only glue: pdf.ts, pipeline.ts, cn.ts
+    public/                      artwork, generated sample pages, pdf worker
+
+packages/
+  core/                          @veda/core - the assessment engine
+    src/types.ts                 domain model
+    src/mapping.ts               label matching + page stitching
+    src/normalize.ts             model output -> domain model, with clamping
+    src/prompts.ts               all four prompts
+    src/gemini.ts                REST client, (model x key) failover, tokens
+    tests/                       33 tests, run by `npm test`
+
+scripts/                         repo-level tooling
   generate-sample.mjs            emits the demo pages AND their ground-truth boxes
-  test-mapping.ts                mapping and extraction tests
-  test-gemini.ts                 failover tests against a stubbed API
   verify-fallback.ts             probes live quota across every key and model
   capture-screenshots.mjs        regenerates the images in this README
+  copy-pdf-worker.mjs            postinstall: copies the pdf.js worker into public/
 ```
+
+### Why a monorepo
+
+`packages/core` holds everything with **no UI dependency** — the label matching, page
+stitching, model-output coercion and API failover. It imports no React, no Next and no
+DOM, which is what lets `node --test` exercise it directly with no bundler or mocking
+harness in the way. The parts most worth testing are exactly the parts with nothing
+attached to them.
+
+`apps/web` consumes it as a normal workspace dependency. The package ships TypeScript
+source rather than a build artefact — Next compiles it via `transpilePackages`, so there
+is no build step to keep in sync.
 
 ### About the bundled sample
 

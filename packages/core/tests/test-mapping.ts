@@ -6,10 +6,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isDailyQuotaError } from "../src/lib/gemini.ts";
-import { qualifySubPart } from "../src/lib/normalize.ts";
-import { buildResults, matchByLabel, normalizeLabel, stitchBlocks } from "../src/lib/mapping.ts";
-import type { AnswerBlock, ExtractedQuestion } from "../src/lib/types.ts";
+import { isDailyQuotaError } from "../src/gemini.ts";
+import { qualifySubPart } from "../src/normalize.ts";
+import { buildResults, matchByLabel, normalizeLabel, stitchBlocks } from "../src/mapping.ts";
+import type { AnswerBlock, ExtractedQuestion } from "../src/types.ts";
 
 function q(number: string, order: number, parentNumber: string | null = null): ExtractedQuestion {
   return {

@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { AnswerViewer, type HighlightTarget } from "@/components/AnswerViewer";
 import { QuestionList, type Selection } from "@/components/QuestionList";
 import { cn } from "@/lib/cn";
-import type { AssessmentResult, PageImage } from "@/lib/types";
+import type { AssessmentResult, PageImage } from "@veda/core";
 
 function SummaryBar({ data, onRestart }: { data: AssessmentResult; onRestart: () => void }) {
   const [open, setOpen] = useState(false);

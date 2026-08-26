@@ -3,7 +3,7 @@
 import { AlertCircle, Check, Loader2, RotateCcw } from "lucide-react";
 
 import { cn } from "@/lib/cn";
-import type { ProgressState, Stage } from "@/lib/types";
+import type { ProgressState, Stage } from "@veda/core";
 
 /** Pipeline stages, in the order the requirement lays them out. */
 const STAGES: { key: Stage; label: string }[] = [

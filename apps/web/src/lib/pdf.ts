@@ -1,6 +1,6 @@
 "use client";
 
-import type { PageImage } from "./types";
+import type { PageImage } from "@veda/core";
 
 /**
  * Client-side rasterisation of the uploaded documents.

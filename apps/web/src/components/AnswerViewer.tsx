@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Eye, EyeOff, Minus, Plus } from "lucide-reac
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
-import type { AnswerBlock, PageImage, Region } from "@/lib/types";
+import type { AnswerBlock, PageImage, Region } from "@veda/core";
 
 const ZOOM_STEPS = [50, 75, 100, 125, 150, 200, 250];
 

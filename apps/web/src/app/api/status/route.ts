@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { apiKeys, MODEL_CHAIN, hasApiKey } from "@/lib/gemini";
+import { MODEL_CHAIN, apiKeys, hasApiKey } from "@veda/core";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

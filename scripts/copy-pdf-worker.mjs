@@ -3,8 +3,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+// Hoisted to the workspace root by npm, so resolve from there.
 const src = join(root, "node_modules", "pdfjs-dist", "build", "pdf.worker.min.mjs");
-const destDir = join(root, "public");
+const destDir = join(root, "apps", "web", "public");
 const dest = join(destDir, "pdf.worker.min.mjs");
 
 if (!existsSync(src)) {

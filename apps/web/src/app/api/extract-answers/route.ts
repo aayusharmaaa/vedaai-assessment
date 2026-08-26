@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, dataUrlToInline, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
-import { normalizeBlocks } from "@/lib/normalize";
-import { answerPrompt, ANSWER_SYSTEM } from "@/lib/prompts";
+import { ANSWER_SYSTEM, GeminiError, answerPrompt, callGemini, dataUrlToInline, normalizeBlocks, parseJson, takeUsage } from "@veda/core";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;

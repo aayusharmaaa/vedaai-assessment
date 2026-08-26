@@ -1,4 +1,4 @@
-import type { AnswerBlock, BBox, ExtractedQuestion } from "./types";
+import type { AnswerBlock, BBox, ExtractedQuestion } from "./types.ts";
 
 /**
  * Coercion layer between raw model JSON and the domain model.

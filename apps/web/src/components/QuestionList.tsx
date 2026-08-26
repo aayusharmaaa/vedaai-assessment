@@ -10,8 +10,8 @@ import {
 import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
-import { normalizeLabel, numericPart, subPart } from "@/lib/mapping";
-import type { AssessmentResult, ExtractedQuestion, MappedResult } from "@/lib/types";
+import { normalizeLabel, numericPart, subPart } from "@veda/core";
+import type { AssessmentResult, ExtractedQuestion, MappedResult } from "@veda/core";
 
 type Filter = "all" | "answered" | "unanswered" | "flagged";
 

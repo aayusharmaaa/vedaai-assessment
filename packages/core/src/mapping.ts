@@ -4,7 +4,7 @@ import type {
   MappedResult,
   MappingMethod,
   UnmatchedAnswer,
-} from "./types";
+} from "./types.ts";
 
 /**
  * Answer mapping.

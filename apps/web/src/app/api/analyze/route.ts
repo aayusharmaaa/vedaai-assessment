@@ -1,21 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
-import {
-  buildResults,
-  matchByLabel,
-  normalizeLabel,
-  stitchBlocks,
-  type SemanticMatch,
-} from "@/lib/mapping";
-import { GRADING_SYSTEM, gradingPrompt, MAPPING_SYSTEM, mappingPrompt } from "@/lib/prompts";
-import type {
-  AnswerBlock,
-  ExtractedQuestion,
-  Grade,
-  MappedResult,
-  OverallSummary,
-} from "@/lib/types";
+import { GRADING_SYSTEM, GeminiError, MAPPING_SYSTEM, buildResults, callGemini, gradingPrompt, mappingPrompt, matchByLabel, normalizeLabel, parseJson, stitchBlocks, takeUsage } from "@veda/core";
+import type { AnswerBlock, ExtractedQuestion, Grade, MappedResult, OverallSummary, SemanticMatch } from "@veda/core";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;

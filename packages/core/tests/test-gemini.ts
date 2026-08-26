@@ -10,7 +10,7 @@
 import assert from "node:assert/strict";
 import test, { afterEach, beforeEach } from "node:test";
 
-import { apiKeys, callGemini, MODEL_CHAIN, takeUsage } from "../src/lib/gemini.ts";
+import { apiKeys, callGemini, MODEL_CHAIN, takeUsage } from "../src/gemini.ts";
 
 const realFetch = globalThis.fetch;
 

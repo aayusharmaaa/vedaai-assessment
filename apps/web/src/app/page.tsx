@@ -8,7 +8,7 @@ import { ReviewScreen } from "@/components/ReviewScreen";
 import { UploadScreen } from "@/components/UploadScreen";
 import { runAssessment } from "@/lib/pipeline";
 import sampleBundle from "@/lib/sample.json";
-import type { AssessmentResult, PageImage, ProgressState } from "@/lib/types";
+import type { AssessmentResult, PageImage, ProgressState } from "@veda/core";
 
 type Phase = "upload" | "processing" | "review";
 

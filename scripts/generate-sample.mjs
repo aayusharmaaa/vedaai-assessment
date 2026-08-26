@@ -13,7 +13,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SAMPLE_DIR = join(ROOT, "public", "sample");
+const APP = join(ROOT, "apps", "web");
+const SAMPLE_DIR = join(APP, "public", "sample");
 
 /** A4 at 150dpi. */
 const W = 1240;
@@ -755,7 +756,7 @@ const bundle = {
   result,
 };
 
-writeFileSync(join(ROOT, "src", "lib", "sample.json"), JSON.stringify(bundle, null, 2));
+writeFileSync(join(APP, "src", "lib", "sample.json"), JSON.stringify(bundle, null, 2));
 
 console.log(
   `[generate-sample] ${qpPages.length} question pages, ${asPages.length} answer pages, ` +

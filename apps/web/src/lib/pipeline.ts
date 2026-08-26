@@ -1,7 +1,7 @@
 "use client";
 
 import { renderFilesToPages } from "./pdf";
-import type { AnswerBlock, AssessmentResult, ExtractedQuestion, PageImage, ProgressState } from "./types";
+import type { AnswerBlock, AssessmentResult, ExtractedQuestion, PageImage, ProgressState } from "@veda/core";
 
 /**
  * Client-side orchestration of the pipeline.

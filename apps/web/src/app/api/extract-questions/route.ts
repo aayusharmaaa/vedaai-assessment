@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, dataUrlToInline, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
-import { normalizeQuestions } from "@/lib/normalize";
-import { QUESTION_PROMPT, QUESTION_SYSTEM } from "@/lib/prompts";
+import { GeminiError, QUESTION_PROMPT, QUESTION_SYSTEM, callGemini, dataUrlToInline, normalizeQuestions, parseJson, takeUsage } from "@veda/core";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
