@@ -29,20 +29,41 @@ function TeacherBadge() {
       {/* Outer wash, then a stronger peach ring, then the white portrait disc. */}
       <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
       <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
-      <div className="absolute inset-[30px] overflow-hidden rounded-full bg-white shadow-inner">
-        {/* Simple illustrated teacher, so the page carries no external image. */}
+      <div className="absolute inset-[36px] overflow-hidden rounded-full bg-white shadow-inner">
+        {/* Flat illustrated teacher, so the page carries no external image. */}
         <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
           <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
-          <path d="M60 30c12 0 19 8 19 19v6c0 11-8 19-19 19s-19-8-19-19v-6c0-11 7-19 19-19z" fill="#3b3b44" />
-          <path d="M60 36c9 0 15 5 15 13v7c0 9-6 15-15 15s-15-6-15-15v-7c0-8 6-13 15-13z" fill="#e8b78f" />
-          <path d="M43 46c2-9 8-14 17-14s15 5 17 14c-6-3-11-4-17-4s-11 1-17 4z" fill="#2f2f38" />
-          <rect x="46" y="49" width="12" height="9" rx="4.5" fill="none" stroke="#2f2f38" strokeWidth="1.6" />
-          <rect x="62" y="49" width="12" height="9" rx="4.5" fill="none" stroke="#2f2f38" strokeWidth="1.6" />
-          <path d="M58 53.5h4" stroke="#2f2f38" strokeWidth="1.6" />
-          <path d="M54 64c3 2.5 9 2.5 12 0" stroke="#b97c53" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-          <path d="M36 120c0-16 11-27 24-27s24 11 24 27z" fill="#2f2f38" />
-          <path d="M52 95l8 9 8-9-8-4z" fill="#f4f4f6" />
-          <rect x="68" y="96" width="22" height="16" rx="2" fill="#fff" stroke="#c9c9d1" strokeWidth="1.5" transform="rotate(-8 68 96)" />
+
+          {/* Blazer and shoulders */}
+          <path d="M26 120c0-17 12-29 26-32h16c14 3 26 15 26 32z" fill="#33333c" />
+          {/* Collar */}
+          <path d="M52 88l8 11 8-11-4-2h-8z" fill="#f6f6f8" />
+
+          {/* Neck */}
+          <path d="M54 74h12v12c0 3-12 3-12 0z" fill="#dda87e" />
+
+          {/* Hair behind */}
+          <path d="M38 52c0-14 9-23 22-23s22 9 22 23v10c0 4-3 5-4 2l-2-7c-11 2-25 1-32-4v9c-1 3-6 2-6-2z" fill="#2b2b33" />
+          {/* Face */}
+          <ellipse cx="60" cy="54" rx="16" ry="18" fill="#e8b78f" />
+          {/* Fringe */}
+          <path d="M44 47c3-9 9-13 16-13s13 4 16 13c-7-4-25-4-32 0z" fill="#2b2b33" />
+
+          {/* Glasses */}
+          <rect x="46" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
+          <rect x="61.5" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
+          <path d="M58.5 54.5h3" stroke="#2b2b33" strokeWidth="1.7" />
+
+          {/* Smile */}
+          <path d="M55 65c3 2.5 7 2.5 10 0" stroke="#b97c53" strokeWidth="1.9" fill="none" strokeLinecap="round" />
+
+          {/* Tablet held to one side */}
+          <g transform="rotate(-12 78 104)">
+            <rect x="66" y="95" width="26" height="19" rx="2.5" fill="#fff" stroke="#c9c9d1" strokeWidth="1.6" />
+            <path d="M70 100h18M70 104h18M70 108h12" stroke="#c9c9d1" strokeWidth="1.6" strokeLinecap="round" />
+          </g>
+          {/* Forearm across the body */}
+          <path d="M44 104c6 6 16 8 24 6" stroke="#e8b78f" strokeWidth="7" fill="none" strokeLinecap="round" />
         </svg>
       </div>
 
