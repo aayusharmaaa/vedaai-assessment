@@ -29,6 +29,16 @@ import { cn } from "@/lib/cn";
  */
 const OUT_OF_SCOPE = "Presentational only — this build covers the Exams flow";
 
+/**
+ * Top-bar icon control, taken from the Figma frame spec:
+ * 36x36, white background, fully rounded, contents centred.
+ */
+const TOP_BAR_CONTROL =
+  "grid h-9 w-9 shrink-0 cursor-default place-items-center rounded-full bg-white text-ink transition hover:bg-surface-muted";
+
+/** Avatar artwork, once dropped into public/. */
+const USER_AVATAR = "/user.png";
+
 /** School crest artwork, once dropped into public/. */
 const SCHOOL_CREST = "/school-crest.png";
 
@@ -271,28 +281,31 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 type="button"
                 aria-label="Help"
                 title={`Help — ${OUT_OF_SCOPE}`}
-                className="hidden h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+                className={cn(TOP_BAR_CONTROL, "hidden lg:grid")}
               >
-                <HelpCircle className="h-[22px] w-[22px]" />
+                <HelpCircle className="h-[21px] w-[21px]" strokeWidth={1.8} />
               </button>
 
               <button
                 type="button"
                 aria-label="Notifications"
                 title={`Notifications — ${OUT_OF_SCOPE}`}
-                className="relative grid h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted"
+                className={cn(TOP_BAR_CONTROL, "relative")}
               >
-                <Bell className="h-[22px] w-[22px]" />
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent ring-2 ring-white" />
+                <Bell className="h-[21px] w-[21px]" strokeWidth={1.8} />
+                <span className="absolute right-[7px] top-[7px] h-[7px] w-[7px] rounded-full bg-accent ring-2 ring-white" />
               </button>
 
               <button
                 type="button"
                 aria-label="AI assistant"
                 title={`AI assistant — ${OUT_OF_SCOPE}`}
-                className="hidden h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+                className={cn(TOP_BAR_CONTROL, "hidden lg:grid")}
               >
-                <Sparkles className="h-[22px] w-[22px]" />
+                {/* Solid four-point star, not lucide's two-star Sparkles. */}
+                <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" fill="currentColor" aria-hidden="true">
+                  <path d="M12 1.6l2.2 6.4c.3.9 1 1.6 1.9 1.9l6.3 2.1-6.3 2.1c-.9.3-1.6 1-1.9 1.9L12 22.4l-2.2-6.4a3.2 3.2 0 00-1.9-1.9L1.6 12l6.3-2.1c.9-.3 1.6-1 1.9-1.9z" />
+                </svg>
               </button>
 
               <button
@@ -300,11 +313,16 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 title={`${TEACHER.name} — ${OUT_OF_SCOPE}`}
                 className="flex cursor-default items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2"
               >
-                <span
-                  aria-hidden="true"
-                  className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900"
-                >
-                  {TEACHER.initials}
+                <span className="grid h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-muted">
+                  <ArtworkImage
+                    src={USER_AVATAR}
+                    className="h-full w-full object-cover"
+                    fallback={
+                      <span className="grid h-full w-full place-items-center bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900">
+                        {TEACHER.initials}
+                      </span>
+                    }
+                  />
                 </span>
                 <span className="hidden text-[15px] font-semibold lg:inline">{TEACHER.name}</span>
                 <ChevronDown className="hidden h-4 w-4 text-ink-faint lg:block" />
