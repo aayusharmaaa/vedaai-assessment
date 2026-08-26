@@ -38,6 +38,19 @@
   --radius-card: 1.5rem;
 }
 
+/*
+ * Tailwind v4 dropped the preflight rule that gave buttons a pointer cursor,
+ * so every interactive control was showing an arrow. Declared in the base
+ * layer so the `cursor-default` utility still wins where chrome is inert.
+ */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
+}
+
 html,
 body {
   height: 100%;

@@ -123,8 +123,9 @@ export default function Page() {
     else startSample();
   }, [start, startSample]);
 
-  const crumb =
-    phase === "review" ? "Exams · Answer Mapping" : phase === "processing" ? "Exams · Processing" : "Exams";
+  // The design's breadcrumb names the section only, not the current phase -
+  // the phase is already obvious from the screen itself.
+  const crumb = "Exams";
 
   return (
     <AppShell crumb={crumb} onBack={phase === "upload" ? undefined : reset}>

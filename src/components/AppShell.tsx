@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Bell,
   ChevronDown,
+  Clipboard,
   ClipboardList,
   FileText,
   HelpCircle,
@@ -34,7 +35,10 @@ const OUT_OF_SCOPE = "Presentational only — this build covers the Exams flow";
  * 36x36, white background, fully rounded, contents centred.
  */
 const TOP_BAR_CONTROL =
-  "grid h-9 w-9 shrink-0 cursor-default place-items-center rounded-full bg-white text-ink transition hover:bg-surface-muted";
+  "grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-ink transition hover:bg-surface-muted";
+
+/** Inert chrome keeps the arrow cursor so it does not invite a click. */
+const TOP_BAR_INERT = "cursor-default";
 
 /** Avatar artwork, once dropped into public/. */
 const USER_AVATAR = "/user.png";
@@ -263,16 +267,19 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 type="button"
                 onClick={onBack}
                 aria-label="Back to upload"
-                className="hidden h-9 w-9 place-items-center rounded-lg text-ink transition hover:bg-surface-muted lg:grid"
+                className={cn(
+                  TOP_BAR_CONTROL,
+                  "hidden shadow-[0_1px_4px_rgba(0,0,0,0.10)] hover:bg-surface-muted lg:grid",
+                )}
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-[19px] w-[19px]" strokeWidth={2.2} />
               </button>
             ) : (
               <div className="hidden h-9 w-9 lg:block" />
             )}
 
             <div className="flex min-w-0 items-center gap-2 text-ink-soft">
-              <ClipboardList className="hidden h-[18px] w-[18px] shrink-0 lg:block" />
+              <Clipboard className="hidden h-[19px] w-[19px] shrink-0 lg:block" strokeWidth={1.9} />
               <span className="truncate text-[16px] font-medium">{crumb}</span>
             </div>
 
@@ -281,7 +288,7 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 type="button"
                 aria-label="Help"
                 title={`Help — ${OUT_OF_SCOPE}`}
-                className={cn(TOP_BAR_CONTROL, "hidden lg:grid")}
+                className={cn(TOP_BAR_CONTROL, TOP_BAR_INERT, "hidden lg:grid")}
               >
                 <HelpCircle className="h-[21px] w-[21px]" strokeWidth={1.8} />
               </button>
@@ -290,7 +297,7 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 type="button"
                 aria-label="Notifications"
                 title={`Notifications — ${OUT_OF_SCOPE}`}
-                className={cn(TOP_BAR_CONTROL, "relative")}
+                className={cn(TOP_BAR_CONTROL, TOP_BAR_INERT, "relative")}
               >
                 <Bell className="h-[21px] w-[21px]" strokeWidth={1.8} />
                 <span className="absolute right-[7px] top-[7px] h-[7px] w-[7px] rounded-full bg-accent ring-2 ring-white" />
@@ -300,7 +307,7 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 type="button"
                 aria-label="AI assistant"
                 title={`AI assistant — ${OUT_OF_SCOPE}`}
-                className={cn(TOP_BAR_CONTROL, "hidden lg:grid")}
+                className={cn(TOP_BAR_CONTROL, TOP_BAR_INERT, "hidden lg:grid")}
               >
                 {/* Solid four-point star, not lucide's two-star Sparkles. */}
                 <svg viewBox="0 0 24 24" className="h-[19px] w-[19px]" fill="currentColor" aria-hidden="true">
@@ -311,7 +318,10 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
               <button
                 type="button"
                 title={`${TEACHER.name} — ${OUT_OF_SCOPE}`}
-                className="flex cursor-default items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2"
+                className={cn(
+                  TOP_BAR_INERT,
+                  "flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2",
+                )}
               >
                 <span className="grid h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-muted">
                   <ArtworkImage
