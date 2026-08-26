@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, dataUrlToInline, GeminiError, parseJson } from "@/lib/gemini";
+import { callGemini, dataUrlToInline, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
 import { normalizeQuestions } from "@/lib/normalize";
 import { QUESTION_PROMPT, QUESTION_SYSTEM } from "@/lib/prompts";
 
@@ -43,6 +43,7 @@ export async function POST(req: Request) {
       // Ordering and sub-part splitting benefit from a little deliberation.
       thinkingBudget: 2048,
       maxOutputTokens: 16384,
+      label: "questions",
     });
 
     const parsed = parseJson<{ questions?: unknown[] }>(raw);
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ questions });
+    return NextResponse.json({ questions, usage: takeUsage() });
   } catch (e) {
     const err = e as GeminiError;
     return NextResponse.json(

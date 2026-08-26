@@ -116,12 +116,34 @@ export function normalizeQuestions(raw: unknown[], startOrder = 0): ExtractedQue
   return out;
 }
 
+/**
+ * Breathing room added around a model box, as a fraction of the page.
+ *
+ * The model returns a tight crop of the ink. A single-line answer then
+ * highlights as a hairline band; a little padding makes it read as a
+ * highlighter stroke without reaching into a neighbouring answer.
+ */
+const BOX_PAD_Y = 0.005;
+const BOX_PAD_X = 0.006;
+
+function padBBox(box: BBox): BBox {
+  const x = Math.max(box.x - BOX_PAD_X, 0);
+  const y = Math.max(box.y - BOX_PAD_Y, 0);
+  return {
+    x,
+    y,
+    w: Math.min(box.x + box.w + BOX_PAD_X, 1) - x,
+    h: Math.min(box.y + box.h + BOX_PAD_Y, 1) - y,
+  };
+}
+
 interface RawBlock {
   writtenLabel?: unknown;
   text?: unknown;
   hasDiagram?: unknown;
   isBlank?: unknown;
   continuesFromPrevious?: unknown;
+  continuesOnNextPage?: unknown;
   box_2d?: unknown;
 }
 
@@ -147,8 +169,9 @@ export function normalizeBlocks(raw: unknown[], pageIndex: number, idPrefix: str
       // A struck-out or empty block keeps its label and region but no text, so
       // it maps to its question and reports as "blank" rather than "answered".
       text: isBlank ? "" : text,
-      regions: bbox ? [{ page: pageIndex, bbox }] : [],
+      regions: bbox ? [{ page: pageIndex, bbox: padBBox(bbox) }] : [],
       continuesFromPrevious: asBool(b.continuesFromPrevious),
+      continuesOnNextPage: asBool(b.continuesOnNextPage),
       hasDiagram: asBool(b.hasDiagram),
     });
   }

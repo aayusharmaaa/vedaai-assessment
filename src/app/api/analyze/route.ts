@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, GeminiError, parseJson } from "@/lib/gemini";
+import { callGemini, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
 import {
   buildResults,
   matchByLabel,
@@ -72,8 +72,10 @@ async function semanticPass(
         unansweredQuestions.map((q) => ({ number: q.number, text: q.text })),
         leftoverBlocks.map((b) => ({ id: b.id, label: b.writtenLabel, text: b.text })),
       ),
-      thinkingBudget: 2048,
+      // Measured at ~670 thinking tokens on a real run; 2048 was wasted headroom.
+      thinkingBudget: 768,
       maxOutputTokens: 4096,
+      label: "mapping",
     });
 
     const parsed = parseJson<{
@@ -164,9 +166,11 @@ async function gradePass(
       const raw = await callGemini({
         system: GRADING_SYSTEM,
         prompt: gradingPrompt(chunk.map((c) => c.payload)),
-        thinkingBudget: 1024,
+        // Measured at ~820 thinking tokens per chunk.
+        thinkingBudget: 896,
         temperature: 0.3,
         maxOutputTokens: 8192,
+        label: `grading-${i / GRADING_CHUNK + 1}`,
       });
 
       const parsed = parseJson<{
@@ -294,7 +298,14 @@ export async function POST(req: Request) {
       improvements: graded.improvements,
     };
 
-    return NextResponse.json({ questions, answerBlocks: blocks, results, unmatched, summary });
+    return NextResponse.json({
+      questions,
+      answerBlocks: blocks,
+      results,
+      unmatched,
+      summary,
+      usage: takeUsage(),
+    });
   } catch (e) {
     const err = e as GeminiError;
     return NextResponse.json(

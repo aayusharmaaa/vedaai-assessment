@@ -528,6 +528,7 @@ const ANSWER_TEXT = {
   "p0-1": { label: "Q2", text: "B) Artery" },
   "p0-2": {
     label: "Q4",
+    continuesOnNextPage: true,
     text: "Photosynthesis is the process used by green plants to convert light energy into chemical energy. It takes place inside the chloroplast of the plant cell. The main pigment is chlorophyll, which is green in colour, and the accessory pigments are carotenoids. [diagram: plant with sunlight, carbon dioxide, oxygen and water labelled]",
     diagram: true,
   },
@@ -634,6 +635,7 @@ function buildResult(answerPages) {
     text: v.text,
     regions: [boxes.get(id)],
     continuesFromPrevious: Boolean(v.continues),
+    continuesOnNextPage: Boolean(v.continuesOnNextPage),
     hasDiagram: Boolean(v.diagram),
   }));
 

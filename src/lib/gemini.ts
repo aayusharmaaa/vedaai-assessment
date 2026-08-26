@@ -39,6 +39,30 @@ interface CallOptions {
   temperature?: number;
   maxOutputTokens?: number;
   model?: string;
+  /** Stage name, used only to label token accounting. */
+  label?: string;
+}
+
+export interface TokenUsage {
+  label: string;
+  prompt: number;
+  /** Reasoning tokens. Billed as output on 2.5 models, so worth watching. */
+  thinking: number;
+  output: number;
+  total: number;
+}
+
+/**
+ * Token accounting for the current request.
+ *
+ * Image tokens dominate this pipeline, so knowing the real split between
+ * prompt, thinking and output is what makes tuning evidence-based rather
+ * than guesswork. Set VEDA_LOG_TOKENS=1 to print it per call.
+ */
+const usageLog: TokenUsage[] = [];
+
+export function takeUsage(): TokenUsage[] {
+  return usageLog.splice(0, usageLog.length);
 }
 
 /** Split a data URL into the mime type and raw base64 payload Gemini expects. */
@@ -107,7 +131,31 @@ export async function callGemini(opts: CallOptions): Promise<string> {
     const json = (await res.json()) as {
       candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
       promptFeedback?: { blockReason?: string };
+      usageMetadata?: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        thoughtsTokenCount?: number;
+        totalTokenCount?: number;
+      };
     };
+
+    const u = json.usageMetadata;
+    if (u) {
+      const entry: TokenUsage = {
+        label: opts.label ?? model,
+        prompt: u.promptTokenCount ?? 0,
+        thinking: u.thoughtsTokenCount ?? 0,
+        output: u.candidatesTokenCount ?? 0,
+        total: u.totalTokenCount ?? 0,
+      };
+      usageLog.push(entry);
+      if (process.env.VEDA_LOG_TOKENS) {
+        console.log(
+          `[tokens] ${entry.label}: prompt=${entry.prompt} thinking=${entry.thinking} ` +
+            `output=${entry.output} total=${entry.total}`,
+        );
+      }
+    }
 
     if (json.promptFeedback?.blockReason) {
       throw new GeminiError(`Request blocked: ${json.promptFeedback.blockReason}`);

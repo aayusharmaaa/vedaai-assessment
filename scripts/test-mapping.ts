@@ -28,6 +28,7 @@ function b(
   text = "answer",
   page = 0,
   continues = false,
+  continuesOnNextPage = false,
 ): AnswerBlock {
   return {
     id,
@@ -35,6 +36,7 @@ function b(
     text,
     regions: [{ page, bbox: { x: 0.1, y: 0.1, w: 0.8, h: 0.1 } }],
     continuesFromPrevious: continues,
+    continuesOnNextPage,
     hasDiagram: false,
   };
 }
@@ -197,4 +199,52 @@ test("a bare number resolves against a paper that prints 'Q' prefixes", () => {
 
   const out = matchByLabel(questions, blocks);
   assert.deepEqual(out.byQuestion.get("q1"), ["b1"]);
+});
+
+test("a page-spanning answer stitches even when the model misses the flag", () => {
+  // Regression: a live run left continuesFromPrevious false because the tail
+  // began a fresh sentence, so the second half of Q4 was dropped and then
+  // reported as an unmatched answer.
+  const first = b("b1", "Q4", "Photosynthesis happens in the chloroplast.", 0, false, true);
+  const tail = b("b2", null, "There are two main stages.", 1, false, false);
+
+  const merged = stitchBlocks([first, tail]);
+  assert.equal(merged.length, 1, "the continuation should have been folded in");
+  assert.deepEqual(merged[0].regions.map((r) => r.page), [0, 1]);
+  assert.match(merged[0].text, /two main stages/);
+});
+
+test("the backstop does not merge an unlabelled block on the SAME page", () => {
+  // Same page means the previous answer did not run off the bottom, so an
+  // unlabelled block beside it is a separate answer, not a continuation.
+  const first = b("b1", "Q4", "first", 0, false, true);
+  const other = b("b2", null, "unrelated", 0, false, false);
+
+  assert.equal(stitchBlocks([first, other]).length, 2);
+});
+
+test("the backstop does not merge when the previous answer was complete", () => {
+  // continuesOnNextPage false: the previous answer finished on its own page.
+  const first = b("b1", "Q4", "complete answer", 0, false, false);
+  const next = b("b2", null, "a new unlabelled answer", 1, false, false);
+
+  assert.equal(stitchBlocks([first, next]).length, 2);
+});
+
+test("a labelled block on the next page is never swallowed as a continuation", () => {
+  const first = b("b1", "Q4", "runs on", 0, false, true);
+  const labelled = b("b2", "Q5", "a new answer", 1, false, false);
+
+  assert.equal(stitchBlocks([first, labelled]).length, 2);
+});
+
+test("an answer spanning three pages merges into one block", () => {
+  const p1 = b("b1", "Q8", "part one", 0, false, true);
+  const p2 = b("b2", null, "part two", 1, false, true);
+  const p3 = b("b3", null, "part three", 2, false, false);
+
+  const merged = stitchBlocks([p1, p2, p3]);
+  assert.equal(merged.length, 1);
+  assert.deepEqual(merged[0].regions.map((r) => r.page), [0, 1, 2]);
+  assert.equal(merged[0].continuesOnNextPage, false);
 });

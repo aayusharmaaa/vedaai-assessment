@@ -83,8 +83,13 @@ For each block report:
 - "hasDiagram": true if the block contains a drawing, sketch, graph or labelled figure.
 - "isBlank": true if the student wrote the label but left it empty, wrote
   "not attempted"/"-", or struck the whole block out.
-- "continuesFromPrevious": true ONLY if this block is the tail of an answer that
-  started on the previous page (it begins mid-sentence and carries no new label).
+- "continuesFromPrevious": true if this block carries NO label of its own and
+  continues the answer that was running at the end of the previous page.
+  It does NOT have to begin mid-sentence - a continuation often starts a fresh
+  sentence, a new numbered point, or a new paragraph. What matters is that the
+  student did not label it and it develops the previous page's answer.
+  Set it to false if the block carries its own label, or if it starts a clearly
+  unrelated topic.
 - "box_2d": the tight bounding box around the WHOLE block including its label,
   as [ymin, xmin, ymax, xmax] normalised to 0..1000 of this page's dimensions.
   The box must cover every line of the block, and a diagram if present. Be tight:

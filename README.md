@@ -33,7 +33,8 @@ button walks the full pipeline using bundled data.
 | --- | --- |
 | `npm run dev` | Dev server |
 | `npm run build` | Production build |
-| `npm test` | Edge-case tests for the mapping layer (14 tests) |
+| `npm run build:check` | Build into a throwaway dir (safe while `dev` runs) |
+| `npm test` | Edge-case tests for the mapping layer (19 tests) |
 | `npm run sample` | Regenerate the bundled sample paper, sheet and result |
 
 ---
@@ -109,6 +110,37 @@ feedback addressed to the student, and an overall teacher's summary with strengt
 focus areas. A failed batch leaves those questions ungraded rather than sinking the run.
 
 ---
+
+## Cost and model choice
+
+Measured on a real 6-page run (2-page paper, 4-page answer sheet), 7 model calls:
+
+| Stage | Calls | Prompt | Thinking | Output | Total |
+| --- | --- | --- | --- | --- | --- |
+| Question extraction | 1 | 1,098 | 1,467 | 879 | 3,444 |
+| Answer extraction | 4 | ~1,010 ea | ~480 ea | ~380 ea | 7,484 |
+| Mapping (semantic) | 1 | 501 | 669 | 100 | 1,270 |
+| Grading + summary | 1 | 1,193 | 821 | 755 | 2,769 |
+| **Whole assessment** | **7** | | | | **~15,000** |
+
+`gemini-2.5-flash` is the efficient choice here: it is the cheapest Gemini tier
+with both reliable handwriting OCR and calibrated bounding boxes, which the two
+extraction stages depend on. `flash-lite` is cheaper but measurably weaker at
+both, and those are the graded parts of this assignment.
+
+What actually keeps the cost down is structural:
+
+- **Each page image is sent exactly once.** Images dominate the prompt cost, so
+  the pipeline never re-uploads a page it has already read.
+- **The semantic mapping call only runs when labels fail to resolve.** A tidy
+  paper skips it entirely.
+- **Thinking budgets are sized from measurement, not guesswork.** The mapping
+  call was provisioned at 2,048 but used 669 to emit 100 tokens, so it is now
+  768. Thinking is billed as output on 2.5 models and was a third of all tokens.
+- Grading batches 10 questions per call rather than one call per question.
+
+Set `VEDA_LOG_TOKENS=1` to print per-call usage; the pipeline also logs a
+per-run breakdown to the browser console.
 
 ## Edge cases
 

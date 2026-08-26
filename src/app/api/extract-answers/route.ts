@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { callGemini, dataUrlToInline, GeminiError, parseJson } from "@/lib/gemini";
+import { callGemini, dataUrlToInline, GeminiError, parseJson, takeUsage } from "@/lib/gemini";
 import { normalizeBlocks } from "@/lib/normalize";
 import { answerPrompt, ANSWER_SYSTEM } from "@/lib/prompts";
 
@@ -40,12 +40,13 @@ export async function POST(req: Request) {
       // Localisation is a perception task; heavy thinking mostly costs latency.
       thinkingBudget: 512,
       maxOutputTokens: 12288,
+      label: `answers-p${pageIndex + 1}`,
     });
 
     const parsed = parseJson<{ blocks?: unknown[] }>(raw);
     const blocks = normalizeBlocks(parsed.blocks ?? [], pageIndex, `p${pageIndex}`);
 
-    return NextResponse.json({ blocks });
+    return NextResponse.json({ blocks, usage: takeUsage() });
   } catch (e) {
     const err = e as GeminiError;
     return NextResponse.json(

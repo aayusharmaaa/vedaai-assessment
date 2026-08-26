@@ -106,14 +106,37 @@ function subPartsAlign(a: string, b: string): boolean {
 export function stitchBlocks(blocks: AnswerBlock[]): AnswerBlock[] {
   const out: AnswerBlock[] = [];
 
+  const lastPageOf = (b: AnswerBlock): number | null =>
+    b.regions.length ? b.regions[b.regions.length - 1].page : null;
+  const firstPageOf = (b: AnswerBlock): number | null =>
+    b.regions.length ? b.regions[0].page : null;
+
   for (const block of blocks) {
     const prev = out[out.length - 1];
-    const isContinuation = block.continuesFromPrevious && !block.writtenLabel;
 
-    if (isContinuation && prev) {
+    // A labelled block always starts a new answer.
+    const unlabelled = !block.writtenLabel;
+
+    // Backstop for when the model does not set continuesFromPrevious. If the
+    // previous answer was reported as running off the bottom of its page and
+    // this block opens the next page with no label of its own, it is the tail
+    // of that answer. Relying on the flag alone silently dropped the second
+    // half of page-spanning answers.
+    const opensNextPage =
+      prev !== undefined &&
+      lastPageOf(prev) !== null &&
+      firstPageOf(block) !== null &&
+      firstPageOf(block)! > lastPageOf(prev)!;
+
+    const isContinuation =
+      unlabelled && prev !== undefined && (block.continuesFromPrevious || (prev.continuesOnNextPage && opensNextPage));
+
+    if (isContinuation) {
       prev.text = `${prev.text.trim()} ${block.text.trim()}`.trim();
       prev.regions.push(...block.regions);
       prev.hasDiagram = prev.hasDiagram || block.hasDiagram;
+      // The merged answer inherits whether it is still running off this page.
+      prev.continuesOnNextPage = block.continuesOnNextPage;
       continue;
     }
 

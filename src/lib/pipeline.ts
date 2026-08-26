@@ -22,10 +22,20 @@ export interface PipelineInput {
   signal?: AbortSignal;
 }
 
+export interface StageUsage {
+  label: string;
+  prompt: number;
+  thinking: number;
+  output: number;
+  total: number;
+}
+
 export interface PipelineOutput {
   result: AssessmentResult;
   answerPages: PageImage[];
   questionPages: PageImage[];
+  /** Per-call token accounting for the whole run. */
+  usage: StageUsage[];
 }
 
 async function postJson<T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> {
@@ -80,12 +90,16 @@ export async function runAssessment({
     detail: `Reading ${questionPages.length} page${questionPages.length === 1 ? "" : "s"} of the question paper`,
   });
 
+  const usage: StageUsage[] = [];
   const questions: ExtractedQuestion[] = [];
 
   for (let i = 0; i < questionPages.length; i += QUESTION_CHUNK) {
     const chunk = questionPages.slice(i, i + QUESTION_CHUNK);
 
-    const { questions: batch } = await postJson<{ questions: ExtractedQuestion[] }>(
+    const { questions: batch, usage: u } = await postJson<{
+      questions: ExtractedQuestion[];
+      usage?: StageUsage[];
+    }>(
       "/api/extract-questions",
       {
         pages: chunk.map((p) => ({ dataUrl: p.dataUrl })),
@@ -96,6 +110,7 @@ export async function runAssessment({
     );
 
     questions.push(...batch);
+    if (u) usage.push(...u);
 
     onProgress({
       stage: "questions",
@@ -117,7 +132,10 @@ export async function runAssessment({
       detail: `Reading answer sheet page ${i + 1} of ${answerPages.length}`,
     });
 
-    const { blocks: pageBlocks } = await postJson<{ blocks: AnswerBlock[] }>(
+    const { blocks: pageBlocks, usage: u } = await postJson<{
+      blocks: AnswerBlock[];
+      usage?: StageUsage[];
+    }>(
       "/api/extract-answers",
       {
         page: { dataUrl: answerPages[i].dataUrl },
@@ -129,6 +147,7 @@ export async function runAssessment({
     );
 
     blocks.push(...pageBlocks);
+    if (u) usage.push(...u);
     tail = pageBlocks[pageBlocks.length - 1]?.text ?? tail;
   }
 
@@ -140,14 +159,21 @@ export async function runAssessment({
     detail: `Matching ${blocks.length} answer${blocks.length === 1 ? "" : "s"} to ${questions.length} questions`,
   });
 
-  const analysis = await postJson<AssessmentResult>(
+  const analysis = await postJson<AssessmentResult & { usage?: StageUsage[] }>(
     "/api/analyze",
     { questions, blocks },
     signal,
   );
+  if (analysis.usage) usage.push(...analysis.usage);
 
   onProgress({ stage: "grading", percent: 94, label: "Grading", detail: "Writing feedback" });
   onProgress({ stage: "done", percent: 100, label: "Done", detail: "" });
 
-  return { result: analysis, answerPages, questionPages };
+  const grand = usage.reduce((n, u) => n + u.total, 0);
+  console.info(
+    `[veda] pipeline complete - ${usage.length} model calls, ${grand.toLocaleString()} tokens`,
+    usage,
+  );
+
+  return { result: analysis, answerPages, questionPages, usage };
 }

@@ -66,6 +66,12 @@ export interface AnswerBlock {
   regions: Region[];
   /** True when the block is a continuation of the previous page's block. */
   continuesFromPrevious: boolean;
+  /**
+   * True when the block runs off the bottom of its page unfinished. This is the
+   * authoritative cross-page signal: the next page's first unlabelled block
+   * continues it.
+   */
+  continuesOnNextPage: boolean;
   /** True when the block is a drawing/diagram rather than prose. */
   hasDiagram: boolean;
 }
