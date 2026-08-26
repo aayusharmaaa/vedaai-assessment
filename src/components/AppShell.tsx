@@ -20,6 +20,17 @@ import { useState } from "react";
 
 import { cn } from "@/lib/cn";
 
+/**
+ * The shell is modelled on the Figma, but this assignment scopes to the Exams
+ * flow. The rest of the chrome is presentational - labelled as such on hover and
+ * given a default cursor, so it reads as a deliberate boundary rather than a
+ * dead button.
+ */
+const OUT_OF_SCOPE = "Presentational only — this build covers the Exams flow";
+
+/** The signed-in teacher. Static: the brief specifies no authentication. */
+const TEACHER = { name: "Pratyush Upadhyay", initials: "PU" };
+
 const NAV = [
   { label: "Home", icon: LayoutGrid },
   { label: "My Classroom", icon: MonitorPlay },
@@ -110,8 +121,9 @@ function SidebarBody({
       <button
         type="button"
         onClick={onNavigate}
+        title={`AI Teacher's Toolkit — ${OUT_OF_SCOPE}`}
         className={cn(
-          "group mt-8 flex items-center justify-center gap-2.5 rounded-full bg-ink text-white shadow-sm ring-[3px] ring-accent transition hover:bg-black",
+          "group mt-8 flex cursor-default items-center justify-center gap-2.5 rounded-full bg-ink text-white shadow-sm ring-[3px] ring-accent transition hover:bg-black",
           collapsed ? "h-12 w-12 self-center p-0" : "h-[54px] w-full px-4",
         )}
       >
@@ -126,13 +138,13 @@ function SidebarBody({
             type="button"
             onClick={onNavigate}
             aria-current={active ? "page" : undefined}
-            title={collapsed ? label : undefined}
+            title={active ? (collapsed ? label : undefined) : `${label} — ${OUT_OF_SCOPE}`}
             className={cn(
               "flex items-center rounded-xl text-[16px] transition",
               collapsed ? "h-12 w-12 justify-center" : "h-[52px] w-full gap-3.5 px-3.5",
               active
                 ? "bg-surface-muted font-semibold text-ink"
-                : "font-medium text-ink-soft hover:bg-surface-muted",
+                : "cursor-default font-medium text-ink-soft hover:bg-surface-muted",
             )}
           >
             <Icon className="h-[21px] w-[21px] shrink-0" />
@@ -145,9 +157,9 @@ function SidebarBody({
         <button
           type="button"
           onClick={onNavigate}
-          title={collapsed ? "Settings" : undefined}
+          title={`Settings — ${OUT_OF_SCOPE}`}
           className={cn(
-            "flex items-center rounded-xl font-medium text-ink-soft transition hover:bg-surface-muted",
+            "flex cursor-default items-center rounded-xl font-medium text-ink-soft transition hover:bg-surface-muted",
             collapsed ? "h-11 w-11 justify-center" : "h-12 w-full gap-3 px-3 text-[15px]",
           )}
         >
@@ -248,7 +260,8 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
               <button
                 type="button"
                 aria-label="Help"
-                className="hidden h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+                title={`Help — ${OUT_OF_SCOPE}`}
+                className="hidden h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
               >
                 <HelpCircle className="h-[22px] w-[22px]" />
               </button>
@@ -256,7 +269,8 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
               <button
                 type="button"
                 aria-label="Notifications"
-                className="relative grid h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted"
+                title={`Notifications — ${OUT_OF_SCOPE}`}
+                className="relative grid h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted"
               >
                 <Bell className="h-[22px] w-[22px]" />
                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent ring-2 ring-white" />
@@ -265,22 +279,24 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
               <button
                 type="button"
                 aria-label="AI assistant"
-                className="hidden h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+                title={`AI assistant — ${OUT_OF_SCOPE}`}
+                className="hidden h-10 w-10 cursor-default place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
               >
                 <Sparkles className="h-[22px] w-[22px]" />
               </button>
 
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2"
+                title={`${TEACHER.name} — ${OUT_OF_SCOPE}`}
+                className="flex cursor-default items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2"
               >
                 <span
                   aria-hidden="true"
                   className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900"
                 >
-                  MR
+                  {TEACHER.initials}
                 </span>
-                <span className="hidden text-[15px] font-semibold lg:inline">Madhur Rastogi</span>
+                <span className="hidden text-[15px] font-semibold lg:inline">{TEACHER.name}</span>
                 <ChevronDown className="hidden h-4 w-4 text-ink-faint lg:block" />
               </button>
             </div>

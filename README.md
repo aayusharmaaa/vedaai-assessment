@@ -187,8 +187,12 @@ mapping on any paper printing "Q1".
 - **Diagrams** are graded from a text description of what was drawn, not from the
   drawing itself. The prompt tells the grader not to penalise detail the transcription
   could not capture.
-- The sidebar navigation (Home, My Classroom, …) is **presentational** — the brief scopes
-  this to the Exams flow, so those routes are not built.
+- The sidebar navigation (Home, My Classroom, …), Settings, notifications, help and the
+  profile control are **presentational** — the brief scopes this to the Exams flow, so
+  those routes are not built. They are labelled as such on hover and carry a default
+  cursor, so the boundary reads as deliberate rather than as a broken button.
+- The signed-in teacher is static (`TEACHER` in `AppShell.tsx`); the brief specifies no
+  authentication.
 
 ## Limitations
 
