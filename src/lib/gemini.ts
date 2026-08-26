@@ -9,18 +9,44 @@ const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
 
 export const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
+/**
+ * Fallback model used when the primary model's *daily* free-tier quota is gone.
+ *
+ * Free-tier quota is metered per project **per model**, so a different model is
+ * a different bucket. Flash-Lite is weaker at handwriting and box precision, so
+ * it is strictly a degradation - but a degraded assessment beats a dead page
+ * for anyone trying the deployed URL after the primary quota is spent.
+ */
+export const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash-lite";
+
+/**
+ * True when a 429 is the per-day cap rather than the per-minute one.
+ *
+ * The two need opposite responses: a per-minute cap clears on its own, so
+ * backing off and retrying is right. A per-day cap will not clear for hours,
+ * so retrying the same model just burns the request budget - switching model
+ * is the only thing that helps.
+ */
+export function isDailyQuotaError(body: string): boolean {
+  return /PerDay/i.test(body);
+}
+
 export function hasApiKey(): boolean {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
 export class GeminiError extends Error {
-  constructor(
-    message: string,
-    readonly status?: number,
-    readonly retryable = false,
-  ) {
+  // Declared explicitly rather than as constructor parameter properties, which
+  // Node's type-stripping runner cannot parse - that would make this module
+  // impossible to exercise from the test scripts.
+  readonly status?: number;
+  readonly retryable: boolean;
+
+  constructor(message: string, status?: number, retryable = false) {
     super(message);
     this.name = "GeminiError";
+    this.status = status;
+    this.retryable = retryable;
   }
 }
 
@@ -79,7 +105,8 @@ export async function callGemini(opts: CallOptions): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new GeminiError("GEMINI_API_KEY is not set.", 401);
 
-  const model = opts.model || DEFAULT_MODEL;
+  let model = opts.model || DEFAULT_MODEL;
+  let switchedToFallback = false;
   const parts: Record<string, unknown>[] = [{ text: opts.prompt }];
   for (const img of opts.images || []) {
     parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
@@ -119,6 +146,16 @@ export async function callGemini(opts: CallOptions): Promise<string> {
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       const retryable = RETRYABLE_STATUS.has(res.status);
+
+      // A spent daily quota will not recover during this request. Move to the
+      // fallback model once, then keep retrying against that instead.
+      if (res.status === 429 && isDailyQuotaError(detail) && !switchedToFallback) {
+        switchedToFallback = true;
+        model = FALLBACK_MODEL;
+        attempt -= 1; // this attempt bought nothing; do not spend a retry on it
+        continue;
+      }
+
       lastErr = new GeminiError(
         `Gemini returned ${res.status}: ${detail.slice(0, 400)}`,
         res.status,
@@ -142,7 +179,7 @@ export async function callGemini(opts: CallOptions): Promise<string> {
     const u = json.usageMetadata;
     if (u) {
       const entry: TokenUsage = {
-        label: opts.label ?? model,
+        label: `${opts.label ?? "call"}${model === DEFAULT_MODEL ? "" : ` (${model})`}`,
         prompt: u.promptTokenCount ?? 0,
         thinking: u.thoughtsTokenCount ?? 0,
         output: u.candidatesTokenCount ?? 0,

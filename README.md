@@ -34,8 +34,9 @@ button walks the full pipeline using bundled data.
 | `npm run dev` | Dev server |
 | `npm run build` | Production build |
 | `npm run build:check` | Build into a throwaway dir (safe while `dev` runs) |
-| `npm test` | Edge-case tests for the mapping layer (19 tests) |
+| `npm test` | Edge-case tests for the mapping layer (20 tests) |
 | `npm run sample` | Regenerate the bundled sample paper, sheet and result |
+| `node --experimental-strip-types scripts/verify-fallback.ts` | Probe live quota and the model fallback |
 
 ---
 
@@ -209,8 +210,22 @@ never shows a broken image. Both paths are verified.
 
 ## Limitations
 
-- Free-tier rate limits (roughly 10 requests/minute) mean a very long answer sheet can
-  hit a 429. Retries back off automatically, but a 20-page sheet will be slow.
+- **Free-tier daily quota is the binding constraint.** Google meters
+  `GenerateRequestsPerDayPerProjectPerModel` at **20 requests per day per model**
+  on the free tier. One 6-page assessment costs 7 requests, so a single free key
+  supports fewer than three live assessments per day.
+
+  Two things soften this, but neither removes it:
+  - When the primary model's daily quota is spent, the client detects that it is
+    a *per-day* failure (not per-minute) and transparently retries on
+    `gemini-2.5-flash-lite`, which has its own quota bucket. This is a
+    **degradation** - Flash-Lite is weaker at handwriting and box precision -
+    but a degraded assessment beats a dead page.
+  - When everything is exhausted, the **worked sample** still demonstrates the
+    entire flow with no API calls at all.
+
+  For sustained use, enable billing on the Google Cloud project, or set
+  `GEMINI_MODEL` / `GEMINI_FALLBACK_MODEL` to models with spare quota.
 - Bounding boxes are the model's estimate. They are tight and reliable on clearly
   separated answers; densely packed writing with no whitespace between answers can
   produce a box that slightly over-covers a neighbour.

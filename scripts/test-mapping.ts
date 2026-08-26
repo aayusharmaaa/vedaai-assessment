@@ -6,6 +6,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { isDailyQuotaError } from "../src/lib/gemini.ts";
 import { buildResults, matchByLabel, normalizeLabel, stitchBlocks } from "../src/lib/mapping.ts";
 import type { AnswerBlock, ExtractedQuestion } from "../src/lib/types.ts";
 
@@ -247,4 +248,18 @@ test("an answer spanning three pages merges into one block", () => {
   assert.equal(merged.length, 1);
   assert.deepEqual(merged[0].regions.map((r) => r.page), [0, 1, 2]);
   assert.equal(merged[0].continuesOnNextPage, false);
+});
+
+test("a per-day quota error is distinguished from a per-minute one", () => {
+  // These need opposite responses: per-minute clears on its own so backing off
+  // is right; per-day will not clear for hours, so only switching model helps.
+  assert.equal(
+    isDailyQuotaError('{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}'),
+    true,
+  );
+  assert.equal(
+    isDailyQuotaError('{"quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier"}'),
+    false,
+  );
+  assert.equal(isDailyQuotaError('{"code":503,"message":"overloaded"}'), false);
 });
