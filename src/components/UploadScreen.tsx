@@ -1,6 +1,16 @@
 "use client";
 
-import { ArrowRight, FileText, Sparkles, Upload, X } from "lucide-react";
+import {
+  ArrowRight,
+  Clock,
+  CloudCog,
+  FileText,
+  ListChecks,
+  Settings,
+  Sparkles,
+  Upload,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ArtworkImage } from "@/components/ArtworkImage";
@@ -15,91 +25,82 @@ interface Slot {
 
 const EMPTY: Slot = { files: [], pages: null, error: null };
 
-/** Small orange chip sitting on the boundary between the two peach rings. */
+/**
+ * Chips riding the ring, at the angles used in the reference artwork.
+ * 0 degrees is 3 o'clock, increasing clockwise.
+ */
 const ORBIT_CHIPS = [
-  // angle in degrees (0 = 3 o'clock, clockwise), and the glyph to draw.
-  { angle: -60, d: "M12 7v5l3.5 2 .9-1.5L13.5 11V7zM12 2a10 10 0 100 20 10 10 0 000-20z" },
-  { angle: 175, d: "M4 5h16v3H4zm0 5h16v3H4zm0 5h10v3H4z" },
-  { angle: 25, d: "M12 4a5 5 0 014.9 4A4 4 0 1117 20H7A5 5 0 016 10.1 5 5 0 0112 4z" },
-  { angle: 105, d: "M12 8a4 4 0 100 8 4 4 0 000-8zm9 4l-2-1.5.3-2.5-2.4-.6L15.6 5 13.3 6 12 4 10.7 6 8.4 5 7.1 7.4l-2.4.6.3 2.5L3 12l2 1.5-.3 2.5 2.4.6L8.4 19l2.3-1 1.3 2 1.3-2 2.3 1 1.3-2.4 2.4-.6-.3-2.5z" },
+  { angle: -66, Icon: Clock },
+  { angle: 157, Icon: ListChecks },
+  { angle: 19, Icon: CloudCog },
+  { angle: 114, Icon: Settings },
 ];
 
 /** Radius, in px, of the ring the chips travel along. */
-const ORBIT_RADIUS = 68;
+const ORBIT_RADIUS = 80;
 
 /** Where the artwork lives once dropped into public/. */
 const TEACHER_IMAGE = "/teacher.png";
 
 function TeacherBadge() {
   return (
-    <div className="relative mx-auto h-[172px] w-[172px] shrink-0">
-      {/* Outer wash, then a stronger peach ring, then the white portrait disc. */}
+    <div className="relative mx-auto h-[200px] w-[200px] shrink-0">
+      {/* Concentric rings: soft outer wash, saturated inner band, white disc. */}
       <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
-      <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
-      <div className="absolute inset-[36px] overflow-hidden rounded-full bg-white shadow-inner">
-        <ArtworkImage
-          src={TEACHER_IMAGE}
-          className="h-full w-full select-none object-cover"
-          fallback={
-            <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
-          <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
-
-          {/* Blazer and shoulders */}
-          <path d="M26 120c0-17 12-29 26-32h16c14 3 26 15 26 32z" fill="#33333c" />
-          {/* Collar */}
-          <path d="M52 88l8 11 8-11-4-2h-8z" fill="#f6f6f8" />
-
-          {/* Neck */}
-          <path d="M54 74h12v12c0 3-12 3-12 0z" fill="#dda87e" />
-
-          {/* Hair behind */}
-          <path d="M38 52c0-14 9-23 22-23s22 9 22 23v10c0 4-3 5-4 2l-2-7c-11 2-25 1-32-4v9c-1 3-6 2-6-2z" fill="#2b2b33" />
-          {/* Face */}
-          <ellipse cx="60" cy="54" rx="16" ry="18" fill="#e8b78f" />
-          {/* Fringe */}
-          <path d="M44 47c3-9 9-13 16-13s13 4 16 13c-7-4-25-4-32 0z" fill="#2b2b33" />
-
-          {/* Glasses */}
-          <rect x="46" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
-          <rect x="61.5" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
-          <path d="M58.5 54.5h3" stroke="#2b2b33" strokeWidth="1.7" />
-
-          {/* Smile */}
-          <path d="M55 65c3 2.5 7 2.5 10 0" stroke="#b97c53" strokeWidth="1.9" fill="none" strokeLinecap="round" />
-
-          {/* Tablet held to one side */}
-          <g transform="rotate(-12 78 104)">
-            <rect x="66" y="95" width="26" height="19" rx="2.5" fill="#fff" stroke="#c9c9d1" strokeWidth="1.6" />
-            <path d="M70 100h18M70 104h18M70 108h12" stroke="#c9c9d1" strokeWidth="1.6" strokeLinecap="round" />
-          </g>
-          {/* Forearm across the body */}
-              <path d="M44 104c6 6 16 8 24 6" stroke="#e8b78f" strokeWidth="7" fill="none" strokeLinecap="round" />
-            </svg>
-          }
-        />
-      </div>
+      <div className="absolute inset-[8%] rounded-full bg-peach-inner" />
+      <div className="absolute inset-[23%] rounded-full bg-white" />
 
       {/*
-        The whole ring rotates as one group. Each chip is placed by a static
-        transform, then counter-rotated by an inner span at the same rate so the
-        glyphs stay upright rather than tumbling as they travel.
+        The portrait deliberately overflows the white disc: her head rises past
+        it onto the salmon ring, which is what gives the badge its depth in the
+        reference. Clipping her inside the circle flattens it, so there is no
+        overflow-hidden here - the artwork's own transparency does the framing.
+      */}
+      <ArtworkImage
+        src={TEACHER_IMAGE}
+        className="absolute bottom-[26%] left-1/2 w-[74%] -translate-x-1/2 select-none"
+        fallback={
+          <span className="absolute inset-[23%] overflow-hidden rounded-full">
+            <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
+              <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
+              <path d="M26 120c0-17 12-29 26-32h16c14 3 26 15 26 32z" fill="#33333c" />
+              <path d="M52 88l8 11 8-11-4-2h-8z" fill="#f6f6f8" />
+              <path d="M54 74h12v12c0 3-12 3-12 0z" fill="#dda87e" />
+              <path d="M38 52c0-14 9-23 22-23s22 9 22 23v10c0 4-3 5-4 2l-2-7c-11 2-25 1-32-4v9c-1 3-6 2-6-2z" fill="#2b2b33" />
+              <ellipse cx="60" cy="54" rx="16" ry="18" fill="#e8b78f" />
+              <path d="M44 47c3-9 9-13 16-13s13 4 16 13c-7-4-25-4-32 0z" fill="#2b2b33" />
+              <rect x="46" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
+              <rect x="61.5" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
+              <path d="M58.5 54.5h3" stroke="#2b2b33" strokeWidth="1.7" />
+              <path d="M55 65c3 2.5 7 2.5 10 0" stroke="#b97c53" strokeWidth="1.9" fill="none" strokeLinecap="round" />
+            </svg>
+          </span>
+        }
+      />
+
+      {/*
+        The ring rotates as one group while each chip counter-rotates at the
+        same rate, so the glyphs stay upright rather than tumbling as they
+        travel round.
       */}
       <div className="pointer-events-none absolute inset-0 animate-orbit">
-        {ORBIT_CHIPS.map((chip, i) => (
-          <span
-            key={i}
-            style={{
-              transform: `rotate(${chip.angle}deg) translate(${ORBIT_RADIUS}px) rotate(${-chip.angle}deg)`,
-            }}
-            className="absolute left-1/2 top-1/2 -ml-[13px] -mt-[13px] block h-[26px] w-[26px]"
-          >
-            <span className="animate-orbit-counter grid h-full w-full place-items-center rounded-full bg-accent shadow-[0_2px_6px_rgba(255,92,41,0.35)]">
-              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] text-white" fill="currentColor">
-                <path d={chip.d} />
-              </svg>
+        {ORBIT_CHIPS.map(({ angle, Icon }, i) => {
+          const rad = (angle * Math.PI) / 180;
+          return (
+            <span
+              key={i}
+              style={{
+                left: `calc(50% + ${Math.cos(rad) * ORBIT_RADIUS}px)`,
+                top: `calc(50% + ${Math.sin(rad) * ORBIT_RADIUS}px)`,
+              }}
+              className="absolute -ml-[15px] -mt-[15px] block h-[30px] w-[30px]"
+            >
+              <span className="animate-orbit-counter grid h-full w-full place-items-center rounded-full bg-accent shadow-[0_3px_8px_rgba(255,92,41,0.35)]">
+                <Icon className="h-[16px] w-[16px] text-white" strokeWidth={2.4} />
+              </span>
             </span>
-          </span>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
