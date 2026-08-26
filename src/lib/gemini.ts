@@ -3,36 +3,62 @@
  *
  * Deliberately dependency-free (plain fetch) so there is no SDK version to keep
  * in step with the model surface, and so cold starts on serverless stay small.
+ *
+ * The retry strategy exists because free-tier quota is the binding constraint
+ * on this project: Google meters requests **per day, per project, per model**.
+ * So the client walks a grid of (model x key) rather than hammering one pair.
  */
 
 const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
 
-export const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+/**
+ * Models tried in order, best first.
+ *
+ * Each entry is a separate daily-quota bucket, so falling down the list buys
+ * real headroom rather than just retrying into the same wall. Later entries are
+ * cheaper and weaker - a degradation, but a degraded assessment beats a dead
+ * page for anyone opening the deployed URL.
+ *
+ * Chosen by measurement, not by version number:
+ *   gemini-3.6-flash          ~2s, healthy on every key tested
+ *   gemini-3.5-flash          ~11s, healthy - a separate quota bucket
+ *   gemini-flash-lite-latest  <1s, weakest, last resort
+ *
+ * Deliberately absent:
+ *   gemini-2.5-*        closed to newly created API projects ("no longer
+ *                       available to new users"), so it breaks for anyone who
+ *                       clones this and brings their own key.
+ *   gemini-3.7-flash    returned 503 after ~79s under load while testing.
+ *   gemini-flash-latest a moving alias; timed out on one key, 32s on another.
+ */
+export const MODEL_CHAIN = (
+  process.env.GEMINI_MODELS || "gemini-3.6-flash,gemini-3.5-flash,gemini-flash-lite-latest"
+)
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+export const DEFAULT_MODEL = MODEL_CHAIN[0];
 
 /**
- * Fallback model used when the primary model's *daily* free-tier quota is gone.
+ * Every configured key, de-duplicated.
  *
- * Free-tier quota is metered per project **per model**, so a different model is
- * a different bucket. Flash-Lite is weaker at handwriting and box precision, so
- * it is strictly a degradation - but a degraded assessment beats a dead page
- * for anyone trying the deployed URL after the primary quota is spent.
+ * Quota is per project, so a second key from a different project doubles the
+ * daily allowance. Accepts either numbered vars or one comma-separated list.
  */
-export const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash-lite";
+export function apiKeys(): string[] {
+  const raw = [
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_API_KEY_2,
+    process.env.GEMINI_API_KEY_3,
+    ...(process.env.GEMINI_API_KEYS || "").split(","),
+  ];
 
-/**
- * True when a 429 is the per-day cap rather than the per-minute one.
- *
- * The two need opposite responses: a per-minute cap clears on its own, so
- * backing off and retrying is right. A per-day cap will not clear for hours,
- * so retrying the same model just burns the request budget - switching model
- * is the only thing that helps.
- */
-export function isDailyQuotaError(body: string): boolean {
-  return /PerDay/i.test(body);
+  return [...new Set(raw.map((k) => (k || "").trim()).filter(Boolean))];
 }
 
 export function hasApiKey(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY);
+  return apiKeys().length > 0;
 }
 
 export class GeminiError extends Error {
@@ -50,6 +76,22 @@ export class GeminiError extends Error {
   }
 }
 
+/**
+ * True when a 429 is the per-day cap rather than the per-minute one.
+ *
+ * The two need opposite responses: a per-minute cap clears on its own, so
+ * backing off and retrying is right. A per-day cap will not clear for hours,
+ * so the only useful move is a different key or a different model.
+ */
+export function isDailyQuotaError(body: string): boolean {
+  return /PerDay/i.test(body);
+}
+
+/** True when a model is not available to this project at all. */
+export function isModelUnavailable(status: number, body: string): boolean {
+  return status === 404 || /no longer available|not found|not supported/i.test(body);
+}
+
 interface InlineImage {
   mimeType: string;
   /** base64 payload, no data-URL prefix */
@@ -64,6 +106,7 @@ interface CallOptions {
   thinkingBudget?: number;
   temperature?: number;
   maxOutputTokens?: number;
+  /** Overrides the whole chain with a single model. */
   model?: string;
   /** Stage name, used only to label token accounting. */
   label?: string;
@@ -71,8 +114,10 @@ interface CallOptions {
 
 export interface TokenUsage {
   label: string;
+  /** Which model actually served the call. */
+  model: string;
   prompt: number;
-  /** Reasoning tokens. Billed as output on 2.5 models, so worth watching. */
+  /** Reasoning tokens. Billed as output on these models, so worth watching. */
   thinking: number;
   output: number;
   total: number;
@@ -98,21 +143,41 @@ export function dataUrlToInline(dataUrl: string): InlineImage {
   return { mimeType: match[1], data: match[2] };
 }
 
+/** Transient failures worth a straight retry on the same model and key. */
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
-/** One generateContent call, with bounded retry on rate limits and 5xx. */
-export async function callGemini(opts: CallOptions): Promise<string> {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) throw new GeminiError("GEMINI_API_KEY is not set.", 401);
+const ATTEMPTS_PER_PAIR = 2;
 
-  let model = opts.model || DEFAULT_MODEL;
-  let switchedToFallback = false;
+/**
+ * Per-attempt ceiling.
+ *
+ * Without this, an overloaded model holds the connection open before failing:
+ * gemini-3.7-flash was measured taking 79s to return a 503, which stalled the
+ * whole pipeline behind a model that was never going to answer. Failing over
+ * quickly is worth far more than waiting out a struggling endpoint.
+ */
+const REQUEST_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS || 60_000);
+
+/**
+ * One generateContent call.
+ *
+ * Walks (model x key) outward: every key is tried on the best model before
+ * dropping to a weaker one, so quality is preserved for as long as quota
+ * anywhere allows it.
+ */
+export async function callGemini(opts: CallOptions): Promise<string> {
+  const keys = apiKeys();
+  if (keys.length === 0) throw new GeminiError("No Gemini API key is configured.", 401);
+
+  const models = opts.model ? [opts.model] : MODEL_CHAIN;
+  let lastErr: GeminiError | null = null;
+
   const parts: Record<string, unknown>[] = [{ text: opts.prompt }];
   for (const img of opts.images || []) {
     parts.push({ inline_data: { mime_type: img.mimeType, data: img.data } });
   }
 
-  const body = {
+  const body = JSON.stringify({
     system_instruction: { parts: [{ text: opts.system }] },
     contents: [{ role: "user", parts }],
     generationConfig: {
@@ -121,97 +186,114 @@ export async function callGemini(opts: CallOptions): Promise<string> {
       responseMimeType: "application/json",
       thinkingConfig: { thinkingBudget: opts.thinkingBudget ?? 1024 },
     },
-  };
+  });
 
-  let lastErr: GeminiError | null = null;
+  for (const model of models) {
+    let modelUnavailable = false;
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) {
-      // Exponential backoff; the free tier is rate limited per minute.
-      await new Promise((r) => setTimeout(r, 1200 * 2 ** (attempt - 1)));
-    }
+    for (const key of keys) {
+      for (let attempt = 0; attempt < ATTEMPTS_PER_PAIR; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, 1500 * attempt));
 
-    let res: Response;
-    try {
-      res = await fetch(`${API_ROOT}/${model}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify(body),
-      });
-    } catch (e) {
-      lastErr = new GeminiError(`Network error contacting Gemini: ${String(e)}`, undefined, true);
-      continue;
-    }
+        let res: Response;
+        try {
+          res = await fetch(`${API_ROOT}/${model}:generateContent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+            body,
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+          });
+        } catch (e) {
+          const timedOut = e instanceof Error && e.name === "TimeoutError";
+          lastErr = new GeminiError(
+            timedOut
+              ? `${model} did not respond within ${REQUEST_TIMEOUT_MS / 1000}s.`
+              : `Network error contacting Gemini: ${String(e)}`,
+            undefined,
+            true,
+          );
+          // A model that is timing out will keep timing out; move on rather
+          // than spending the second attempt on it.
+          if (timedOut) break;
+          continue;
+        }
 
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      const retryable = RETRYABLE_STATUS.has(res.status);
+        if (!res.ok) {
+          const detail = await res.text().catch(() => "");
+          lastErr = new GeminiError(
+            `${model} returned ${res.status}: ${detail.slice(0, 300)}`,
+            res.status,
+            RETRYABLE_STATUS.has(res.status),
+          );
 
-      // A spent daily quota will not recover during this request. Move to the
-      // fallback model once, then keep retrying against that instead.
-      if (res.status === 429 && isDailyQuotaError(detail) && !switchedToFallback) {
-        switchedToFallback = true;
-        model = FALLBACK_MODEL;
-        attempt -= 1; // this attempt bought nothing; do not spend a retry on it
-        continue;
+          // This model is closed to the project - no key will help.
+          if (isModelUnavailable(res.status, detail)) {
+            modelUnavailable = true;
+            break;
+          }
+          // This key's daily allowance is gone and will not return today.
+          if (res.status === 429 && isDailyQuotaError(detail)) break;
+          // Anything else retryable gets another go on the same pair.
+          if (RETRYABLE_STATUS.has(res.status)) continue;
+
+          throw lastErr;
+        }
+
+        const json = (await res.json()) as {
+          candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
+          promptFeedback?: { blockReason?: string };
+          usageMetadata?: {
+            promptTokenCount?: number;
+            candidatesTokenCount?: number;
+            thoughtsTokenCount?: number;
+            totalTokenCount?: number;
+          };
+        };
+
+        const u = json.usageMetadata;
+        if (u) {
+          const entry: TokenUsage = {
+            label: opts.label ?? "call",
+            model,
+            prompt: u.promptTokenCount ?? 0,
+            thinking: u.thoughtsTokenCount ?? 0,
+            output: u.candidatesTokenCount ?? 0,
+            total: u.totalTokenCount ?? 0,
+          };
+          usageLog.push(entry);
+          if (process.env.VEDA_LOG_TOKENS) {
+            console.log(
+              `[tokens] ${entry.label} via ${model}: prompt=${entry.prompt} ` +
+                `thinking=${entry.thinking} output=${entry.output} total=${entry.total}`,
+            );
+          }
+        }
+
+        if (json.promptFeedback?.blockReason) {
+          throw new GeminiError(`Request blocked: ${json.promptFeedback.blockReason}`);
+        }
+
+        const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") ?? "";
+        if (!text.trim()) {
+          lastErr = new GeminiError(
+            `${model} returned an empty response (finishReason=${json.candidates?.[0]?.finishReason}).`,
+            undefined,
+            true,
+          );
+          continue;
+        }
+
+        return text;
       }
 
-      lastErr = new GeminiError(
-        `Gemini returned ${res.status}: ${detail.slice(0, 400)}`,
-        res.status,
-        retryable,
-      );
-      if (!retryable) throw lastErr;
-      continue;
+      if (modelUnavailable) break;
     }
-
-    const json = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[];
-      promptFeedback?: { blockReason?: string };
-      usageMetadata?: {
-        promptTokenCount?: number;
-        candidatesTokenCount?: number;
-        thoughtsTokenCount?: number;
-        totalTokenCount?: number;
-      };
-    };
-
-    const u = json.usageMetadata;
-    if (u) {
-      const entry: TokenUsage = {
-        label: `${opts.label ?? "call"}${model === DEFAULT_MODEL ? "" : ` (${model})`}`,
-        prompt: u.promptTokenCount ?? 0,
-        thinking: u.thoughtsTokenCount ?? 0,
-        output: u.candidatesTokenCount ?? 0,
-        total: u.totalTokenCount ?? 0,
-      };
-      usageLog.push(entry);
-      if (process.env.VEDA_LOG_TOKENS) {
-        console.log(
-          `[tokens] ${entry.label}: prompt=${entry.prompt} thinking=${entry.thinking} ` +
-            `output=${entry.output} total=${entry.total}`,
-        );
-      }
-    }
-
-    if (json.promptFeedback?.blockReason) {
-      throw new GeminiError(`Request blocked: ${json.promptFeedback.blockReason}`);
-    }
-
-    const text = json.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") ?? "";
-    if (!text.trim()) {
-      // MAX_TOKENS with no text is worth one more try at a lower thinking budget.
-      lastErr = new GeminiError(
-        `Gemini returned an empty response (finishReason=${json.candidates?.[0]?.finishReason}).`,
-        undefined,
-        true,
-      );
-      continue;
-    }
-    return text;
   }
 
-  throw lastErr ?? new GeminiError("Gemini call failed for an unknown reason.");
+  throw (
+    lastErr ??
+    new GeminiError("Every configured model and key failed for an unknown reason.", 502)
+  );
 }
 
 /**

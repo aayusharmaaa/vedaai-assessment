@@ -24,6 +24,8 @@ export interface PipelineInput {
 
 export interface StageUsage {
   label: string;
+  /** Which model actually served the call, after any fallback. */
+  model: string;
   prompt: number;
   thinking: number;
   output: number;

@@ -25,6 +25,9 @@ Numbering rules (these decide correctness):
 3. When sub-parts share a stem, repeat the stem inside each sub-part's "text" so
    every entry reads on its own, then set "parentNumber" to the shared number.
    For a parent that has sub-parts, emit ONLY the sub-parts, not the parent.
+   A sub-part's "number" must ALWAYS carry its parent number, even when the page
+   prints only the letter. A paper showing "7. (a) ..." then "(b) ..." on the
+   next line gives "7 (a)" and "7 (b)" - never a bare "(b)".
 4. "OR" alternatives are separate questions; suffix the number as printed
    (e.g. "5 (OR)") and keep both.
 

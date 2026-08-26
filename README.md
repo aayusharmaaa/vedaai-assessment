@@ -6,7 +6,8 @@ answer to its question, grades it, and highlights the exact region of the answer
 where that answer sits.
 
 **Live URL:** _(add after deploying — see [Deploying](#deploying))_
-**AI model:** Google **Gemini 2.5 Flash** (`gemini-2.5-flash`) via the Generative Language REST API — free tier.
+**AI model:** Google Gemini via the Generative Language REST API (free tier), tried in order:
+`gemini-3.6-flash` → `gemini-3.5-flash` → `gemini-flash-lite-latest`.
 
 ---
 
@@ -34,7 +35,7 @@ button walks the full pipeline using bundled data.
 | `npm run dev` | Dev server |
 | `npm run build` | Production build |
 | `npm run build:check` | Build into a throwaway dir (safe while `dev` runs) |
-| `npm test` | Edge-case tests for the mapping layer (20 tests) |
+| `npm test` | Edge-case tests for mapping and extraction (24 tests) |
 | `npm run sample` | Regenerate the bundled sample paper, sheet and result |
 | `node --experimental-strip-types scripts/verify-fallback.ts` | Probe live quota and the model fallback |
 
@@ -124,10 +125,21 @@ Measured on a real 6-page run (2-page paper, 4-page answer sheet), 7 model calls
 | Grading + summary | 1 | 1,193 | 821 | 755 | 2,769 |
 | **Whole assessment** | **7** | | | | **~15,000** |
 
-`gemini-2.5-flash` is the efficient choice here: it is the cheapest Gemini tier
-with both reliable handwriting OCR and calibrated bounding boxes, which the two
-extraction stages depend on. `flash-lite` is cheaper but measurably weaker at
-both, and those are the graded parts of this assignment.
+Models were chosen by measurement, not by version number. Benchmarked across two
+keys on a trivial prompt:
+
+| Model | Latency | Notes |
+| --- | --- | --- |
+| `gemini-3.6-flash` | ~2s | Healthy on every key — **primary** |
+| `gemini-3.5-flash` | ~11s | Healthy, separate quota bucket — second |
+| `gemini-flash-lite-latest` | <1s | Weakest, last resort |
+| `gemini-3.7-flash` | **79s → 503** | Overloaded; excluded |
+| `gemini-flash-latest` | timeout / 32s | Moving alias, unreliable; excluded |
+| `gemini-2.5-flash` | — | Closed to new API projects; excluded |
+
+`gemini-2.5-*` is deliberately avoided: it returns *"no longer available to new
+users"* on recently created keys, so pinning it would break for anyone cloning
+this repo with their own key.
 
 What actually keeps the cost down is structural:
 
@@ -135,6 +147,13 @@ What actually keeps the cost down is structural:
   the pipeline never re-uploads a page it has already read.
 - **The semantic mapping call only runs when labels fail to resolve.** A tidy
   paper skips it entirely.
+- **Quota is walked as a grid.** Free-tier allowance is per project *per model*,
+  so the client tries every key on the best model before dropping to a weaker
+  one — quality is preserved for as long as any quota allows.
+- **Every attempt is capped at 60s.** An overloaded model otherwise holds the
+  connection open before failing (`gemini-3.7-flash` was measured taking 79s to
+  return a 503), stalling the pipeline behind a model that was never going to
+  answer.
 - **Thinking budgets are sized from measurement, not guesswork.** The mapping
   call was provisioned at 2,048 but used 669 to emit 100 tokens, so it is now
   768. Thinking is billed as output on 2.5 models and was a third of all tokens.

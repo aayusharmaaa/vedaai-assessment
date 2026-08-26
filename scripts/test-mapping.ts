@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { isDailyQuotaError } from "../src/lib/gemini.ts";
+import { qualifySubPart } from "../src/lib/normalize.ts";
 import { buildResults, matchByLabel, normalizeLabel, stitchBlocks } from "../src/lib/mapping.ts";
 import type { AnswerBlock, ExtractedQuestion } from "../src/lib/types.ts";
 
@@ -262,4 +263,36 @@ test("a per-day quota error is distinguished from a per-minute one", () => {
     false,
   );
   assert.equal(isDailyQuotaError('{"code":503,"message":"overloaded"}'), false);
+});
+
+test("a bare sub-part number is qualified with its parent", () => {
+  // Regression from a live run: a paper printing "7. (a)" then "(b)" on the
+  // next line yielded number "(b)", which identifies nothing and forced the
+  // slower semantic matcher to rescue it.
+  assert.equal(qualifySubPart("(b)", "7"), "7 (b)");
+  assert.equal(qualifySubPart("(ii)", "11"), "11 (ii)");
+  assert.equal(qualifySubPart("b", "7."), "7 b");
+});
+
+test("qualifying leaves an already-qualified number untouched", () => {
+  assert.equal(qualifySubPart("7. (a)", "7"), "7. (a)");
+  assert.equal(qualifySubPart("11 (b)", "11"), "11 (b)");
+  assert.equal(qualifySubPart("Q7(a)", "7"), "Q7(a)");
+});
+
+test("qualifying does not touch a question with no parent", () => {
+  assert.equal(qualifySubPart("3", null), "3");
+  assert.equal(qualifySubPart("(iii)", null), "(iii)");
+});
+
+test("a qualified sub-part matches a student's label directly", () => {
+  // The point of qualifying: "7 (b)" matches "Q7(b)" by label, where a bare
+  // "(b)" would not.
+  const questions = [q("7 (a)", 0, "7"), q(qualifySubPart("(b)", "7"), 1, "7")];
+  const blocks = [b("b1", "Q7(a)."), b("b2", "Q7(b).")];
+
+  const out = matchByLabel(questions, blocks);
+  assert.deepEqual(out.byQuestion.get("q0"), ["b1"]);
+  assert.deepEqual(out.byQuestion.get("q1"), ["b2"]);
+  assert.equal(out.leftoverBlocks.length, 0, "neither block should need the semantic pass");
 });

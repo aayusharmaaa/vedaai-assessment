@@ -74,6 +74,32 @@ interface RawQuestion {
 }
 
 /**
+ * Ensure a sub-part carries its parent's number.
+ *
+ * A paper prints "7. (a) ..." then simply "(b) ..." on the next line, so a
+ * faithful reading of the second line yields the number "(b)". That is useless
+ * on its own: it does not identify the question to a teacher, and it cannot be
+ * matched against a student who wrote "Q7(b)". Since the model reports the
+ * parent separately, the full number is recoverable here rather than left to
+ * the model to remember.
+ *
+ *   ("(b)",     "7")  -> "7 (b)"
+ *   ("7. (a)",  "7")  -> "7. (a)"   (already qualified)
+ *   ("3",       null) -> "3"
+ */
+export function qualifySubPart(number: string, parentNumber: string | null): string {
+  if (!parentNumber) return number;
+
+  const parentDigits = /(\d+)/.exec(parentNumber)?.[1];
+  if (!parentDigits) return number;
+
+  // Already carries the parent's digits at the front - leave it alone.
+  if (new RegExp(String.raw`^\D*${parentDigits}(?!\d)`).test(number)) return number;
+
+  return `${parentDigits} ${number}`.trim();
+}
+
+/**
  * Build the ordered question list. `order` is assigned here, from the model's
  * output sequence, which is what preserves the paper's printed order downstream
  * no matter what order the student answered in.
@@ -100,14 +126,15 @@ export function normalizeQuestions(raw: unknown[], startOrder = 0): ExtractedQue
     const kindRaw = asString(q.kind).toLowerCase();
     const marks = asNumberOrNull(q.maxMarks);
     const order = startOrder + out.length;
+    const parentNumber = asString(q.parentNumber).trim() || null;
 
     out.push({
       id: `q${order}`,
-      number,
+      number: qualifySubPart(number, parentNumber),
       order,
       text,
       maxMarks: marks !== null && marks > 0 ? marks : null,
-      parentNumber: asString(q.parentNumber).trim() || null,
+      parentNumber,
       section: asString(q.section).trim() || null,
       kind: (QUESTION_KINDS.has(kindRaw) ? kindRaw : "other") as ExtractedQuestion["kind"],
     });
