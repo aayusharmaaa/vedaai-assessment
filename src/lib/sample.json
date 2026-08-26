@@ -1,0 +1,558 @@
+{
+  "questionPaperPages": [
+    {
+      "index": 0,
+      "dataUrl": "/sample/qp-1.svg",
+      "width": 1240,
+      "height": 1754
+    },
+    {
+      "index": 1,
+      "dataUrl": "/sample/qp-2.svg",
+      "width": 1240,
+      "height": 1754
+    }
+  ],
+  "answerSheetPages": [
+    {
+      "index": 0,
+      "dataUrl": "/sample/as-1.svg",
+      "width": 1240,
+      "height": 1754
+    },
+    {
+      "index": 1,
+      "dataUrl": "/sample/as-2.svg",
+      "width": 1240,
+      "height": 1754
+    },
+    {
+      "index": 2,
+      "dataUrl": "/sample/as-3.svg",
+      "width": 1240,
+      "height": 1754
+    },
+    {
+      "index": 3,
+      "dataUrl": "/sample/as-4.svg",
+      "width": 1240,
+      "height": 1754
+    }
+  ],
+  "result": {
+    "questions": [
+      {
+        "id": "q0",
+        "number": "1",
+        "order": 0,
+        "text": "Which of the following organelles is primarily involved in photosynthesis? A) Mitochondrion B) Chloroplast C) Ribosome D) Nucleus",
+        "maxMarks": 1,
+        "parentNumber": null,
+        "section": "Section A",
+        "kind": "mcq"
+      },
+      {
+        "id": "q1",
+        "number": "2",
+        "order": 1,
+        "text": "Which blood vessel carries blood away from the heart? A) Vein B) Artery C) Capillary D) Venule",
+        "maxMarks": 1,
+        "parentNumber": null,
+        "section": "Section A",
+        "kind": "mcq"
+      },
+      {
+        "id": "q2",
+        "number": "3",
+        "order": 2,
+        "text": "The green pigment that traps light energy in plants is called: A) Haemoglobin B) Chlorophyll C) Carotene D) Xanthophyll",
+        "maxMarks": 1,
+        "parentNumber": null,
+        "section": "Section A",
+        "kind": "mcq"
+      },
+      {
+        "id": "q3",
+        "number": "4",
+        "order": 3,
+        "text": "Explain the role of chloroplasts in photosynthesis, naming the main pigments involved and briefly outlining the two major stages of the process.",
+        "maxMarks": 3,
+        "parentNumber": null,
+        "section": "Section B",
+        "kind": "long"
+      },
+      {
+        "id": "q4",
+        "number": "5",
+        "order": 4,
+        "text": "Describe the flow of blood through the human heart starting from the right atrium and ending at the aorta; include the names of the valves crossed.",
+        "maxMarks": 3,
+        "parentNumber": null,
+        "section": "Section B",
+        "kind": "long"
+      },
+      {
+        "id": "q5",
+        "number": "6",
+        "order": 5,
+        "text": "Write the balanced chemical equation for photosynthesis and state where the plant obtains each raw material from.",
+        "maxMarks": 3,
+        "parentNumber": null,
+        "section": "Section B",
+        "kind": "numerical"
+      },
+      {
+        "id": "q6",
+        "number": "7 (a)",
+        "order": 6,
+        "text": "Draw a labelled diagram of an alveolus showing the capillary network and air space. Label the alveolar sac, the capillary, and the direction of gas exchange.",
+        "maxMarks": 3,
+        "parentNumber": "7",
+        "section": "Section C",
+        "kind": "diagram"
+      },
+      {
+        "id": "q7",
+        "number": "7 (b)",
+        "order": 7,
+        "text": "State two structural features of alveoli that make them efficient for gas exchange.",
+        "maxMarks": 2,
+        "parentNumber": "7",
+        "section": "Section C",
+        "kind": "short"
+      },
+      {
+        "id": "q8",
+        "number": "8",
+        "order": 8,
+        "text": "Draw a neat labelled diagram of the human digestive system, labelling at least five organs, and state one function of the liver.",
+        "maxMarks": 5,
+        "parentNumber": null,
+        "section": "Section C",
+        "kind": "diagram"
+      },
+      {
+        "id": "q9",
+        "number": "9",
+        "order": 9,
+        "text": "Differentiate between arteries and veins on the basis of wall thickness, presence of valves, and direction of blood flow.",
+        "maxMarks": 3,
+        "parentNumber": null,
+        "section": "Section C",
+        "kind": "short"
+      },
+      {
+        "id": "q10",
+        "number": "10",
+        "order": 10,
+        "text": "What is transpiration? State two functions of transpiration in plants.",
+        "maxMarks": 3,
+        "parentNumber": null,
+        "section": "Section C",
+        "kind": "short"
+      }
+    ],
+    "answerBlocks": [
+      {
+        "id": "p0-0",
+        "writtenLabel": "Q1",
+        "text": "B) Chloroplast",
+        "regions": [
+          {
+            "page": 0,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.0599,
+              "w": 0.8266,
+              "h": 0.0416
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p0-1",
+        "writtenLabel": "Q2",
+        "text": "B) Artery",
+        "regions": [
+          {
+            "page": 0,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.0975,
+              "w": 0.8266,
+              "h": 0.0416
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p0-2",
+        "writtenLabel": "Q4",
+        "text": "Photosynthesis is the process used by green plants to convert light energy into chemical energy. It takes place inside the chloroplast of the plant cell. The main pigment is chlorophyll, which is green in colour, and the accessory pigments are carotenoids. [diagram: plant with sunlight, carbon dioxide, oxygen and water labelled] There are two main stages: 1. Light reaction - captures light energy in the grana and makes ATP and NADPH. 2. Dark reaction - uses that energy to make glucose in the stroma.",
+        "regions": [
+          {
+            "page": 0,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.1351,
+              "w": 0.8266,
+              "h": 0.3985
+            }
+          },
+          {
+            "page": 1,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.0599,
+              "w": 0.8266,
+              "h": 0.1511
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": true
+      },
+      {
+        "id": "p1-1",
+        "writtenLabel": "Q6",
+        "text": "6CO2 + 6H2O --light/chlorophyll--> C6H12O6 + 6O2. Carbon dioxide is taken from the air through the stomata and water is absorbed from the soil by the roots.",
+        "regions": [
+          {
+            "page": 1,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.2104,
+              "w": 0.8266,
+              "h": 0.1237
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p1-2",
+        "writtenLabel": "Q5",
+        "text": "Blood comes into the right atrium from the body. Then it goes to the right ventricle and is pumped to the lungs. From the lungs it comes back to the left atrium, goes to the left ventricle and then out through the aorta to the whole body.",
+        "regions": [
+          {
+            "page": 1,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.3335,
+              "w": 0.8266,
+              "h": 0.1511
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p2-0",
+        "writtenLabel": "Q7(a)",
+        "text": "[diagram: labelled alveolus showing alveolar sac, capillary network, bronchiole, with arrows for O2 in and CO2 out]",
+        "regions": [
+          {
+            "page": 2,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.0599,
+              "w": 0.8266,
+              "h": 0.232
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": true
+      },
+      {
+        "id": "p2-1",
+        "writtenLabel": "Q7(b)",
+        "text": "(i) The alveoli have very thin walls, only one cell thick, so gases can diffuse quickly. (ii) They are present in very large numbers, which gives a very large surface area for exchange.",
+        "regions": [
+          {
+            "page": 2,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.2754,
+              "w": 0.8266,
+              "h": 0.1237
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p2-2",
+        "writtenLabel": "Q9",
+        "text": "Arteries have thick and elastic walls while veins have thin walls. Veins have valves in them but arteries do not have valves. Arteries carry blood away from the heart and veins bring blood back to the heart.",
+        "regions": [
+          {
+            "page": 2,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.3985,
+              "w": 0.8266,
+              "h": 0.1511
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p3-0",
+        "writtenLabel": "Q8",
+        "text": "[diagram: human digestive system labelled mouth, oesophagus, stomach, small intestine, large intestine, liver] The liver makes bile, which helps in the digestion of fats.",
+        "regions": [
+          {
+            "page": 3,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.0599,
+              "w": 0.8266,
+              "h": 0.3483
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": true
+      },
+      {
+        "id": "p3-1",
+        "writtenLabel": "Q12",
+        "text": "Osmosis is the movement of water molecules from a dilute solution to a concentrated solution through a semi-permeable membrane.",
+        "regions": [
+          {
+            "page": 3,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.4111,
+              "w": 0.8266,
+              "h": 0.0964
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      },
+      {
+        "id": "p3-2",
+        "writtenLabel": null,
+        "text": "Rough work: 6 x 2 = 12, 12 + 6 = 18",
+        "regions": [
+          {
+            "page": 3,
+            "bbox": {
+              "x": 0.1089,
+              "y": 0.5091,
+              "w": 0.8266,
+              "h": 0.0667
+            }
+          }
+        ],
+        "continuesFromPrevious": false,
+        "hasDiagram": false
+      }
+    ],
+    "results": [
+      {
+        "questionId": "q0",
+        "answerBlockIds": [
+          "p0-0"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 1,
+          "max": 1,
+          "verdict": "correct",
+          "feedback": "Correct - the chloroplast is the site of photosynthesis."
+        }
+      },
+      {
+        "questionId": "q1",
+        "answerBlockIds": [
+          "p0-1"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 1,
+          "max": 1,
+          "verdict": "correct",
+          "feedback": "Correct. Arteries carry blood away from the heart."
+        }
+      },
+      {
+        "questionId": "q2",
+        "answerBlockIds": [],
+        "status": "unanswered",
+        "method": "none",
+        "confidence": 0,
+        "grade": {
+          "awarded": 0,
+          "max": 1,
+          "verdict": "incorrect",
+          "feedback": "This question was not attempted."
+        }
+      },
+      {
+        "questionId": "q3",
+        "answerBlockIds": [
+          "p0-2"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 3,
+          "max": 3,
+          "verdict": "correct",
+          "feedback": "A complete answer: you named chlorophyll and the carotenoids and set out both the light and dark reactions with the right locations (grana and stroma)."
+        }
+      },
+      {
+        "questionId": "q4",
+        "answerBlockIds": [
+          "p1-2"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 2,
+          "max": 3,
+          "verdict": "partial",
+          "feedback": "The route through the four chambers is right, but the question asked for the valves crossed - you needed the tricuspid, pulmonary, bicuspid and aortic valves."
+        }
+      },
+      {
+        "questionId": "q5",
+        "answerBlockIds": [
+          "p1-1"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 3,
+          "max": 3,
+          "verdict": "correct",
+          "feedback": "The equation is balanced and correctly conditioned, and you sourced both raw materials properly (stomata for CO2, roots for water)."
+        }
+      },
+      {
+        "questionId": "q6",
+        "answerBlockIds": [
+          "p2-0"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 3,
+          "max": 3,
+          "verdict": "correct",
+          "feedback": "Clear diagram - alveolar sac, capillary and the direction of gas exchange are all labelled correctly."
+        }
+      },
+      {
+        "questionId": "q7",
+        "answerBlockIds": [
+          "p2-1"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 2,
+          "max": 2,
+          "verdict": "correct",
+          "feedback": "Both features are right: the one-cell-thick wall for fast diffusion and the large number of alveoli for surface area."
+        }
+      },
+      {
+        "questionId": "q8",
+        "answerBlockIds": [
+          "p3-0"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 4,
+          "max": 5,
+          "verdict": "partial",
+          "feedback": "Five organs are labelled correctly and the bile function of the liver is right, but the pancreas is missing from your diagram."
+        }
+      },
+      {
+        "questionId": "q9",
+        "answerBlockIds": [
+          "p2-2"
+        ],
+        "status": "answered",
+        "method": "label",
+        "confidence": 1,
+        "grade": {
+          "awarded": 3,
+          "max": 3,
+          "verdict": "correct",
+          "feedback": "All three points of difference are correct and clearly stated."
+        }
+      },
+      {
+        "questionId": "q10",
+        "answerBlockIds": [],
+        "status": "unanswered",
+        "method": "none",
+        "confidence": 0,
+        "grade": {
+          "awarded": 0,
+          "max": 3,
+          "verdict": "incorrect",
+          "feedback": "This question was not attempted."
+        }
+      }
+    ],
+    "unmatched": [
+      {
+        "answerBlockId": "p3-1",
+        "reason": "Labelled \"Q12\", which is not a question on this paper. The content is about osmosis, which this paper does not ask about."
+      },
+      {
+        "answerBlockId": "p3-2",
+        "reason": "Rough working; it does not answer any question on the paper."
+      }
+    ],
+    "summary": {
+      "totalAwarded": 22,
+      "totalMax": 28,
+      "answeredCount": 9,
+      "unansweredCount": 2,
+      "unmatchedCount": 2,
+      "percentage": 79,
+      "remark": "Ananya has a strong grasp of photosynthesis - the equation, the pigments and both stages are accurate, and the diagrams are neat and correctly labelled. The gaps are in the circulatory system: the heart valves were not named, and two questions were left unattempted.",
+      "strengths": [
+        "Photosynthesis: equation and both stages",
+        "Neat, correctly labelled diagrams",
+        "Clear artery vs vein comparison"
+      ],
+      "improvements": [
+        "Name the heart valves in the blood-flow path",
+        "Attempt every question - Q3 and Q10 were skipped",
+        "Include the pancreas in the digestive system diagram"
+      ]
+    },
+    "isMock": true
+  }
+}

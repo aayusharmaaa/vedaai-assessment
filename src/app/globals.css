@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/**
+ * Design tokens taken from the VedaAI Figma reference:
+ * warm grey canvas, white cards with generous radii, a single orange accent,
+ * near-black for primary actions, and green/red only for grading signals.
+ */
+@theme {
+  --color-canvas: #ebebeb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f5f5;
+
+  --color-ink: #17171a;
+  --color-ink-soft: #4a4a52;
+  --color-ink-faint: #8b8b94;
+
+  --color-accent: #f4632a;
+  --color-accent-soft: #fde3d6;
+  --color-accent-tint: #fff3ec;
+
+  --color-good: #16a34a;
+  --color-good-soft: #dcfce7;
+  --color-bad: #ef4444;
+  --color-bad-soft: #fee2e2;
+  --color-warn: #d97706;
+  --color-warn-soft: #fef3c7;
+
+  --color-line: #e4e4e7;
+
+  --font-sans:
+    Figtree, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --radius-card: 1.5rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The app owns its own scroll regions; the page itself never scrolls. */
+@media (min-width: 1024px) {
+  body {
+    overflow: hidden;
+  }
+}
+
+@layer utilities {
+  .scrollbar-slim {
+    scrollbar-width: thin;
+    scrollbar-color: #cfcfd4 transparent;
+  }
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    background: #cfcfd4;
+    border-radius: 99px;
+  }
+  .scrollbar-slim::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* Marker-pen underline used on the headline accent words. */
+.accent-mark {
+  background: var(--color-accent-soft);
+  border-radius: 0.5rem;
+  padding: 0.05em 0.3em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+@keyframes veda-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+.animate-sheen {
+  animation: veda-sheen 1.6s ease-in-out infinite;
+}
+
+@keyframes veda-pulse-ring {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.3;
+  }
+}
+.animate-pulse-ring {
+  animation: veda-pulse-ring 2.6s ease-in-out infinite;
+}
+
+@keyframes veda-twinkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.88) rotate(-8deg);
+    opacity: 0.75;
+  }
+}
+.animate-twinkle {
+  animation: veda-twinkle 1.9s ease-in-out infinite;
+}
+
+/* The answer-sheet highlight: a soft green wash that draws itself in. */
+@keyframes veda-highlight-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-highlight-in {
+  animation: veda-highlight-in 0.28s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheen,
+  .animate-pulse-ring,
+  .animate-twinkle,
+  .animate-highlight-in {
+    animation: none;
+  }
+}

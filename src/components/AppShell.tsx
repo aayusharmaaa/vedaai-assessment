@@ -1,0 +1,293 @@
+"use client";
+
+import {
+  ArrowLeft,
+  Bell,
+  ChevronDown,
+  ClipboardList,
+  FileText,
+  HelpCircle,
+  LayoutGrid,
+  Menu,
+  MonitorPlay,
+  PanelLeft,
+  PieChart,
+  Settings,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+
+import { cn } from "@/lib/cn";
+
+const NAV = [
+  { label: "Home", icon: LayoutGrid },
+  { label: "My Classroom", icon: MonitorPlay },
+  { label: "Assignments", icon: FileText },
+  { label: "Exams", icon: ClipboardList, active: true },
+  { label: "My Library", icon: PieChart },
+];
+
+function Wordmark({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ink">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+          <path d="M4 5h5.2l2.8 8.4L14.8 5H20l-6 14h-4L4 5z" fill="#fff" />
+        </svg>
+      </div>
+      {!compact && <span className="text-[22px] font-extrabold tracking-tight">VedaAI</span>}
+    </div>
+  );
+}
+
+function SchoolCard({ compact = false }: { compact?: boolean }) {
+  const crest = (
+    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-white">
+      <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden="true">
+        <path
+          d="M16 3l11 4v9c0 6.6-4.6 11.6-11 13C9.6 27.6 5 22.6 5 16V7l11-4z"
+          fill="none"
+          stroke="#2f6b3a"
+          strokeWidth="1.8"
+        />
+        <path d="M16 9v11M11 13h10M12 24h8" stroke="#2f6b3a" strokeWidth="1.6" fill="none" />
+      </svg>
+    </div>
+  );
+
+  if (compact) return crest;
+
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-surface-muted p-3">
+      {crest}
+      <div className="min-w-0">
+        <p className="truncate text-[15px] font-bold leading-tight">Delhi Public School</p>
+        <p className="truncate text-[13px] text-ink-faint">Bokaro Steel City</p>
+      </div>
+    </div>
+  );
+}
+
+function SidebarBody({
+  collapsed,
+  onToggle,
+  onNavigate,
+  showToggle = true,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+  onNavigate?: () => void;
+  showToggle?: boolean;
+}) {
+  return (
+    <div className="flex h-full flex-col p-4">
+      <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
+        <Wordmark compact={collapsed} />
+        {showToggle && !collapsed && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Collapse sidebar"
+            className="grid h-9 w-9 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={onNavigate}
+        className={cn(
+          "group mt-6 flex items-center justify-center gap-2 rounded-full bg-ink text-white shadow-sm ring-2 ring-accent transition hover:bg-black",
+          collapsed ? "h-11 w-11 self-center p-0" : "h-12 w-full px-4",
+        )}
+      >
+        <Sparkles className="h-[18px] w-[18px] shrink-0 text-accent" />
+        {!collapsed && <span className="text-[15px] font-semibold">AI Teacher&apos;s Toolkit</span>}
+      </button>
+
+      <nav className={cn("mt-8 flex flex-col gap-1", collapsed && "items-center")}>
+        {NAV.map(({ label, icon: Icon, active }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={onNavigate}
+            aria-current={active ? "page" : undefined}
+            title={collapsed ? label : undefined}
+            className={cn(
+              "flex items-center rounded-xl text-[15px] transition",
+              collapsed ? "h-11 w-11 justify-center" : "h-12 w-full gap-3 px-3",
+              active
+                ? "bg-surface-muted font-semibold text-ink"
+                : "font-medium text-ink-soft hover:bg-surface-muted",
+            )}
+          >
+            <Icon className="h-[19px] w-[19px] shrink-0" />
+            {!collapsed && <span>{label}</span>}
+          </button>
+        ))}
+      </nav>
+
+      <div className="mt-auto space-y-4 pt-6">
+        <button
+          type="button"
+          onClick={onNavigate}
+          title={collapsed ? "Settings" : undefined}
+          className={cn(
+            "flex items-center rounded-xl font-medium text-ink-soft transition hover:bg-surface-muted",
+            collapsed ? "h-11 w-11 justify-center" : "h-12 w-full gap-3 px-3 text-[15px]",
+          )}
+        >
+          <Settings className="h-[19px] w-[19px] shrink-0" />
+          {!collapsed && <span>Settings</span>}
+        </button>
+        <SchoolCard compact={collapsed} />
+        {collapsed && showToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Expand sidebar"
+            className="mx-auto grid h-9 w-9 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
+          >
+            <PanelLeft className="h-5 w-5 rotate-180" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export interface AppShellProps {
+  /** Breadcrumb label shown in the top bar. */
+  crumb: string;
+  /** Shown when the user can step back to the upload screen. */
+  onBack?: () => void;
+  children: React.ReactNode;
+}
+
+export function AppShell({ crumb, onBack, children }: AppShellProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [drawer, setDrawer] = useState(false);
+
+  return (
+    <div className="flex h-full min-h-dvh lg:h-dvh lg:overflow-hidden">
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden shrink-0 transition-[width] duration-300 lg:block",
+          collapsed ? "w-[92px]" : "w-[300px]",
+        )}
+      >
+        <div className="h-full rounded-r-[28px] bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+          <SidebarBody collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+        </div>
+      </aside>
+
+      {/* Mobile drawer */}
+      {drawer && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setDrawer(false)}
+            className="absolute inset-0 bg-black/40"
+          />
+          <div className="absolute inset-y-0 left-0 w-[280px] bg-surface shadow-xl">
+            <button
+              type="button"
+              onClick={() => setDrawer(false)}
+              aria-label="Close menu"
+              className="absolute right-3 top-4 z-10 grid h-9 w-9 place-items-center rounded-lg text-ink-faint hover:bg-surface-muted"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <SidebarBody
+              collapsed={false}
+              onToggle={() => undefined}
+              onNavigate={() => setDrawer(false)}
+              showToggle={false}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:overflow-hidden">
+        <header className="shrink-0 px-3 pt-3 lg:px-5 lg:pt-4">
+          <div className="flex h-[62px] items-center gap-3 rounded-[20px] bg-surface px-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] lg:px-5">
+            <button
+              type="button"
+              onClick={() => setDrawer(true)}
+              aria-label="Open menu"
+              className="grid h-9 w-9 place-items-center rounded-lg text-ink transition hover:bg-surface-muted lg:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            {onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label="Back to upload"
+                className="hidden h-9 w-9 place-items-center rounded-lg text-ink transition hover:bg-surface-muted lg:grid"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            ) : (
+              <div className="hidden h-9 w-9 lg:block" />
+            )}
+
+            <div className="flex min-w-0 items-center gap-2 text-ink-soft">
+              <ClipboardList className="hidden h-[18px] w-[18px] shrink-0 lg:block" />
+              <span className="truncate text-[16px] font-medium">{crumb}</span>
+            </div>
+
+            <div className="ml-auto flex items-center gap-1.5 lg:gap-3">
+              <button
+                type="button"
+                aria-label="Help"
+                className="hidden h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+              >
+                <HelpCircle className="h-[22px] w-[22px]" />
+              </button>
+
+              <button
+                type="button"
+                aria-label="Notifications"
+                className="relative grid h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted"
+              >
+                <Bell className="h-[22px] w-[22px]" />
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-accent ring-2 ring-white" />
+              </button>
+
+              <button
+                type="button"
+                aria-label="AI assistant"
+                className="hidden h-10 w-10 place-items-center rounded-full text-ink-soft transition hover:bg-surface-muted lg:grid"
+              >
+                <Sparkles className="h-[22px] w-[22px]" />
+              </button>
+
+              <button
+                type="button"
+                className="flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2"
+              >
+                <span
+                  aria-hidden="true"
+                  className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900"
+                >
+                  MR
+                </span>
+                <span className="hidden text-[15px] font-semibold lg:inline">Madhur Rastogi</span>
+                <ChevronDown className="hidden h-4 w-4 text-ink-faint lg:block" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="min-h-0 flex-1 lg:overflow-hidden">{children}</main>
+      </div>
+    </div>
+  );
+}
