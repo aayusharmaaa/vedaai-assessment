@@ -81,17 +81,28 @@ function SidebarBody({
   showToggle?: boolean;
 }) {
   return (
-    <div className="flex h-full flex-col p-4">
-      <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
+    <div className="flex h-full flex-col overflow-y-auto scrollbar-slim p-4">
+      {/*
+        The toggle lives here in both states. Keeping it only at the foot of
+        the rail meant that on a short viewport the collapsed sidebar had no
+        reachable way back open.
+      */}
+      <div
+        className={cn(
+          "flex shrink-0 items-center",
+          collapsed ? "flex-col gap-3" : "justify-between",
+        )}
+      >
         <Wordmark compact={collapsed} />
-        {showToggle && !collapsed && (
+        {showToggle && (
           <button
             type="button"
             onClick={onToggle}
-            aria-label="Collapse sidebar"
-            className="grid h-9 w-9 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!collapsed}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
           >
-            <PanelLeft className="h-5 w-5" />
+            <PanelLeft className={cn("h-5 w-5 transition-transform", collapsed && "rotate-180")} />
           </button>
         )}
       </div>
@@ -144,16 +155,6 @@ function SidebarBody({
           {!collapsed && <span>Settings</span>}
         </button>
         <SchoolCard compact={collapsed} />
-        {collapsed && showToggle && (
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label="Expand sidebar"
-            className="mx-auto grid h-9 w-9 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
-          >
-            <PanelLeft className="h-5 w-5 rotate-180" />
-          </button>
-        )}
       </div>
     </div>
   );
