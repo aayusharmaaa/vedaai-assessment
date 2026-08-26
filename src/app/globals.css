@@ -111,6 +111,26 @@ body {
   animation: veda-pulse-ring 2.6s ease-in-out infinite;
 }
 
+/*
+ * Orbit: the ring of chips rotates as a group while each chip counter-rotates
+ * at the same rate, so the icons keep their upright orientation instead of
+ * tumbling as they travel round.
+ */
+@keyframes veda-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-orbit {
+  animation: veda-orbit 24s linear infinite;
+}
+.animate-orbit-counter {
+  animation: veda-orbit 24s linear infinite reverse;
+}
+
 @keyframes veda-twinkle {
   0%,
   100% {
@@ -145,7 +165,9 @@ body {
   .animate-sheen,
   .animate-pulse-ring,
   .animate-twinkle,
-  .animate-highlight-in {
+  .animate-highlight-in,
+  .animate-orbit,
+  .animate-orbit-counter {
     animation: none;
   }
 }

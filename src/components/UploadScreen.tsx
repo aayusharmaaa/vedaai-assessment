@@ -23,14 +23,43 @@ const ORBIT_CHIPS = [
   { angle: 105, d: "M12 8a4 4 0 100 8 4 4 0 000-8zm9 4l-2-1.5.3-2.5-2.4-.6L15.6 5 13.3 6 12 4 10.7 6 8.4 5 7.1 7.4l-2.4.6.3 2.5L3 12l2 1.5-.3 2.5 2.4.6L8.4 19l2.3-1 1.3 2 1.3-2 2.3 1 1.3-2.4 2.4-.6-.3-2.5z" },
 ];
 
+/** Radius, in px, of the ring the chips travel along. */
+const ORBIT_RADIUS = 68;
+
+/** Where the artwork lives once dropped into public/. */
+const TEACHER_IMAGE = "/teacher.png";
+
 function TeacherBadge() {
+  // Falls back to the inline illustration if the artwork has not been added,
+  // so the upload screen never renders an empty disc.
+  const [artworkOk, setArtworkOk] = useState(true);
+  const artworkRef = useRef<HTMLImageElement>(null);
+
+  // The image is server-rendered, so a 404 can resolve before React attaches
+  // onError during hydration. Re-check on mount, or the broken image sticks.
+  useEffect(() => {
+    const el = artworkRef.current;
+    if (el?.complete && el.naturalWidth === 0) setArtworkOk(false);
+  }, []);
+
   return (
     <div className="relative mx-auto h-[172px] w-[172px] shrink-0">
       {/* Outer wash, then a stronger peach ring, then the white portrait disc. */}
       <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
       <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
       <div className="absolute inset-[36px] overflow-hidden rounded-full bg-white shadow-inner">
-        {/* Flat illustrated teacher, so the page carries no external image. */}
+        {artworkOk ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            ref={artworkRef}
+            src={TEACHER_IMAGE}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            onError={() => setArtworkOk(false)}
+            className="h-full w-full select-none object-cover"
+          />
+        ) : (
         <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
           <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
 
@@ -65,26 +94,31 @@ function TeacherBadge() {
           {/* Forearm across the body */}
           <path d="M44 104c6 6 16 8 24 6" stroke="#e8b78f" strokeWidth="7" fill="none" strokeLinecap="round" />
         </svg>
+        )}
       </div>
 
-      {ORBIT_CHIPS.map((chip, i) => {
-        // Place each chip on the ring boundary, 68px out from centre.
-        const rad = (chip.angle * Math.PI) / 180;
-        return (
+      {/*
+        The whole ring rotates as one group. Each chip is placed by a static
+        transform, then counter-rotated by an inner span at the same rate so the
+        glyphs stay upright rather than tumbling as they travel.
+      */}
+      <div className="pointer-events-none absolute inset-0 animate-orbit">
+        {ORBIT_CHIPS.map((chip, i) => (
           <span
             key={i}
             style={{
-              left: `calc(50% + ${Math.cos(rad) * 68}px)`,
-              top: `calc(50% + ${Math.sin(rad) * 68}px)`,
+              transform: `rotate(${chip.angle}deg) translate(${ORBIT_RADIUS}px) rotate(${-chip.angle}deg)`,
             }}
-            className="absolute -ml-[13px] -mt-[13px] grid h-[26px] w-[26px] place-items-center rounded-full bg-accent shadow-[0_2px_6px_rgba(255,92,41,0.35)]"
+            className="absolute left-1/2 top-1/2 -ml-[13px] -mt-[13px] block h-[26px] w-[26px]"
           >
-            <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] text-white" fill="currentColor">
-              <path d={chip.d} />
-            </svg>
+            <span className="animate-orbit-counter grid h-full w-full place-items-center rounded-full bg-accent shadow-[0_2px_6px_rgba(255,92,41,0.35)]">
+              <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] text-white" fill="currentColor">
+                <path d={chip.d} />
+              </svg>
+            </span>
           </span>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
