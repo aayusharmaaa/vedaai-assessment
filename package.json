@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "node scripts/copy-pdf-worker.mjs",
-    "test": "node --experimental-strip-types --test scripts/test-mapping.ts",
+    "test": "node --experimental-strip-types --test scripts/test-mapping.ts scripts/test-gemini.ts",
     "sample": "node scripts/generate-sample.mjs",
     "build:check": "node scripts/build-check.mjs"
   },

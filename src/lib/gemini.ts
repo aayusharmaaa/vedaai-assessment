@@ -47,12 +47,19 @@ export const DEFAULT_MODEL = MODEL_CHAIN[0];
  * daily allowance. Accepts either numbered vars or one comma-separated list.
  */
 export function apiKeys(): string[] {
-  const raw = [
-    process.env.GEMINI_API_KEY,
-    process.env.GEMINI_API_KEY_2,
-    process.env.GEMINI_API_KEY_3,
-    ...(process.env.GEMINI_API_KEYS || "").split(","),
-  ];
+  // Discovered by scanning the environment rather than listing fixed names, so
+  // adding GEMINI_API_KEY_4 on the host needs no code change. Sorted so the
+  // order is stable and predictable: GEMINI_API_KEY first, then _2, _3, ...
+  const numbered = Object.keys(process.env)
+    .filter((name) => /^GEMINI_API_KEY(_\d+)?$/.test(name))
+    .sort((a, b) => {
+      const n = (k: string) => Number(/_(\d+)$/.exec(k)?.[1] ?? 1);
+      return n(a) - n(b);
+    })
+    .map((name) => process.env[name]);
+
+  // GEMINI_API_KEYS (plural) additionally accepts a comma-separated list.
+  const raw = [...numbered, ...(process.env.GEMINI_API_KEYS || "").split(",")];
 
   return [...new Set(raw.map((k) => (k || "").trim()).filter(Boolean))];
 }

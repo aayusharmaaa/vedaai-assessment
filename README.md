@@ -35,7 +35,7 @@ button walks the full pipeline using bundled data.
 | `npm run dev` | Dev server |
 | `npm run build` | Production build |
 | `npm run build:check` | Build into a throwaway dir (safe while `dev` runs) |
-| `npm test` | Edge-case tests for mapping and extraction (24 tests) |
+| `npm test` | Mapping, extraction and API-failover tests (33 tests) |
 | `npm run sample` | Regenerate the bundled sample paper, sheet and result |
 | `node --experimental-strip-types scripts/verify-fallback.ts` | Probe live quota and the model fallback |
 
@@ -148,8 +148,23 @@ What actually keeps the cost down is structural:
 - **The semantic mapping call only runs when labels fail to resolve.** A tidy
   paper skips it entirely.
 - **Quota is walked as a grid.** Free-tier allowance is per project *per model*,
-  so the client tries every key on the best model before dropping to a weaker
-  one — quality is preserved for as long as any quota allows.
+  so the client tries **every key on the best model** before dropping to a
+  weaker one — quality is preserved for as long as any quota allows:
+
+  ```
+  gemini-3.6-flash + key1  →  gemini-3.6-flash + key2   (same model, next key)
+       ↓ only once every key is spent
+  gemini-3.5-flash + key1  →  gemini-3.5-flash + key2
+       ↓
+  gemini-flash-lite-latest + key1 → …
+  ```
+
+  A per-*day* 429 abandons that key immediately (it will not recover today);
+  a per-*minute* 429 retries the same key instead, since it clears on its own.
+  Add keys as `GEMINI_API_KEY`, `GEMINI_API_KEY_2`, `GEMINI_API_KEY_3`, … —
+  they are discovered from the environment, so no code change is needed.
+  Nine tests in `scripts/test-gemini.ts` pin this behaviour against a stubbed
+  API.
 - **Every attempt is capped at 60s.** An overloaded model otherwise holds the
   connection open before failing (`gemini-3.7-flash` was measured taking 79s to
   return a 503), stalling the pipeline behind a model that was never going to
