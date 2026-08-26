@@ -37,14 +37,9 @@ function TeacherBadge() {
       <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
       <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
       <div className="absolute inset-[36px] overflow-hidden rounded-full bg-white shadow-inner">
-        {/*
-          The supplied artwork is the whole badge - it has its own rings and
-          chips baked in. Scaling up crops to the portrait at its centre so the
-          baked-in rings fall outside the disc and do not double up with ours.
-        */}
         <ArtworkImage
           src={TEACHER_IMAGE}
-          className="h-full w-full origin-center scale-[2.05] select-none object-cover"
+          className="h-full w-full select-none object-cover"
           fallback={
             <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
           <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
