@@ -14,12 +14,22 @@ interface Slot {
 
 const EMPTY: Slot = { files: [], pages: null, error: null };
 
+/** Small orange chip sitting on the boundary between the two peach rings. */
+const ORBIT_CHIPS = [
+  // angle in degrees (0 = 3 o'clock, clockwise), and the glyph to draw.
+  { angle: -60, d: "M12 7v5l3.5 2 .9-1.5L13.5 11V7zM12 2a10 10 0 100 20 10 10 0 000-20z" },
+  { angle: 175, d: "M4 5h16v3H4zm0 5h16v3H4zm0 5h10v3H4z" },
+  { angle: 25, d: "M12 4a5 5 0 014.9 4A4 4 0 1117 20H7A5 5 0 016 10.1 5 5 0 0112 4z" },
+  { angle: 105, d: "M12 8a4 4 0 100 8 4 4 0 000-8zm9 4l-2-1.5.3-2.5-2.4-.6L15.6 5 13.3 6 12 4 10.7 6 8.4 5 7.1 7.4l-2.4.6.3 2.5L3 12l2 1.5-.3 2.5 2.4.6L8.4 19l2.3-1 1.3 2 1.3-2 2.3 1 1.3-2.4 2.4-.6-.3-2.5z" },
+];
+
 function TeacherBadge() {
   return (
     <div className="relative mx-auto h-[172px] w-[172px] shrink-0">
-      <div className="absolute inset-0 animate-pulse-ring rounded-full bg-accent/12" />
-      <div className="absolute inset-[14px] rounded-full bg-accent/18" />
-      <div className="absolute inset-[26px] overflow-hidden rounded-full bg-white shadow-inner">
+      {/* Outer wash, then a stronger peach ring, then the white portrait disc. */}
+      <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
+      <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
+      <div className="absolute inset-[30px] overflow-hidden rounded-full bg-white shadow-inner">
         {/* Simple illustrated teacher, so the page carries no external image. */}
         <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
           <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
@@ -36,22 +46,24 @@ function TeacherBadge() {
         </svg>
       </div>
 
-      {[
-        { top: "6%", left: "72%", d: "M4 4h16v16H4z" },
-        { top: "34%", left: "-2%", d: "M4 6h16v4H4zM4 14h10v4H4z" },
-        { top: "76%", left: "8%", d: "M12 3l2.5 6H21l-5 4 2 7-6-4-6 4 2-7-5-4h6.5z" },
-        { top: "62%", left: "84%", d: "M12 3l9 5v8l-9 5-9-5V8z" },
-      ].map((chip, i) => (
-        <span
-          key={i}
-          style={{ top: chip.top, left: chip.left }}
-          className="absolute grid h-8 w-8 place-items-center rounded-lg bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-accent" fill="currentColor">
-            <path d={chip.d} />
-          </svg>
-        </span>
-      ))}
+      {ORBIT_CHIPS.map((chip, i) => {
+        // Place each chip on the ring boundary, 68px out from centre.
+        const rad = (chip.angle * Math.PI) / 180;
+        return (
+          <span
+            key={i}
+            style={{
+              left: `calc(50% + ${Math.cos(rad) * 68}px)`,
+              top: `calc(50% + ${Math.sin(rad) * 68}px)`,
+            }}
+            className="absolute -ml-[13px] -mt-[13px] grid h-[26px] w-[26px] place-items-center rounded-full bg-accent shadow-[0_2px_6px_rgba(255,92,41,0.35)]"
+          >
+            <svg viewBox="0 0 24 24" className="h-[14px] w-[14px] text-white" fill="currentColor">
+              <path d={chip.d} />
+            </svg>
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -167,13 +179,13 @@ function DropZone({
           onClick={() => inputRef.current?.click()}
           className="flex flex-col items-center gap-3 py-4 text-center"
         >
-          <span className="grid h-12 w-12 place-items-center rounded-xl bg-surface-muted">
-            <Upload className="h-5 w-5 text-ink" />
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-surface-muted">
+            <Upload className="h-[22px] w-[22px] text-ink" />
           </span>
           <span className="text-[19px] font-bold">
             Upload <span className="text-accent">{title}</span>
           </span>
-          <span className="text-[14px] text-ink-faint">Max 10MB · PDF, PNG or JPG</span>
+          <span className="text-[14px] text-ink-faint">Max 10MB</span>
         </button>
       )}
 
@@ -282,7 +294,7 @@ export function UploadScreen({ onStart, onSample, hasApiKey }: UploadScreenProps
             "mt-7 flex h-[54px] items-center gap-2.5 rounded-full px-8 text-[17px] font-semibold transition",
             ready
               ? "bg-ink text-white shadow-lg hover:bg-black"
-              : "cursor-not-allowed bg-[#d6d6d9] text-[#8e8e96]",
+              : "cursor-not-allowed bg-[#c9c9cd] text-white",
           )}
         >
           Start Mapping

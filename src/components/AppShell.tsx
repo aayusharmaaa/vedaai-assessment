@@ -100,15 +100,15 @@ function SidebarBody({
         type="button"
         onClick={onNavigate}
         className={cn(
-          "group mt-6 flex items-center justify-center gap-2 rounded-full bg-ink text-white shadow-sm ring-2 ring-accent transition hover:bg-black",
-          collapsed ? "h-11 w-11 self-center p-0" : "h-12 w-full px-4",
+          "group mt-8 flex items-center justify-center gap-2.5 rounded-full bg-ink text-white shadow-sm ring-[3px] ring-accent transition hover:bg-black",
+          collapsed ? "h-12 w-12 self-center p-0" : "h-[54px] w-full px-4",
         )}
       >
-        <Sparkles className="h-[18px] w-[18px] shrink-0 text-accent" />
-        {!collapsed && <span className="text-[15px] font-semibold">AI Teacher&apos;s Toolkit</span>}
+        <Sparkles className="h-[19px] w-[19px] shrink-0 text-white" />
+        {!collapsed && <span className="text-[16px] font-semibold">AI Teacher&apos;s Toolkit</span>}
       </button>
 
-      <nav className={cn("mt-8 flex flex-col gap-1", collapsed && "items-center")}>
+      <nav className={cn("mt-10 flex flex-col gap-2", collapsed && "items-center")}>
         {NAV.map(({ label, icon: Icon, active }) => (
           <button
             key={label}
@@ -117,14 +117,14 @@ function SidebarBody({
             aria-current={active ? "page" : undefined}
             title={collapsed ? label : undefined}
             className={cn(
-              "flex items-center rounded-xl text-[15px] transition",
-              collapsed ? "h-11 w-11 justify-center" : "h-12 w-full gap-3 px-3",
+              "flex items-center rounded-xl text-[16px] transition",
+              collapsed ? "h-12 w-12 justify-center" : "h-[52px] w-full gap-3.5 px-3.5",
               active
                 ? "bg-surface-muted font-semibold text-ink"
                 : "font-medium text-ink-soft hover:bg-surface-muted",
             )}
           >
-            <Icon className="h-[19px] w-[19px] shrink-0" />
+            <Icon className="h-[21px] w-[21px] shrink-0" />
             {!collapsed && <span>{label}</span>}
           </button>
         ))}

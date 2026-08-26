@@ -14,28 +14,50 @@ const STAGES: { key: Stage; label: string }[] = [
   { key: "grading", label: "Grading and feedback" },
 ];
 
+/**
+ * Four-point sparkle with concave sides.
+ *
+ * `waist` pulls each control point toward the centre: the smaller it is, the
+ * more the sides cave in and the sharper the points read.
+ */
+function starPath(cx: number, cy: number, r: number, waist = 0.16): string {
+  const w = r * waist;
+  return [
+    `M ${cx} ${cy - r}`,
+    `Q ${cx + w} ${cy - w} ${cx + r} ${cy}`,
+    `Q ${cx + w} ${cy + w} ${cx} ${cy + r}`,
+    `Q ${cx - w} ${cy + w} ${cx - r} ${cy}`,
+    `Q ${cx - w} ${cy - w} ${cx} ${cy - r}`,
+    "Z",
+  ].join(" ");
+}
+
 function Sparkle() {
   return (
-    <svg viewBox="0 0 120 120" className="h-[132px] w-[132px]" aria-hidden="true">
+    <svg viewBox="0 0 360 330" className="h-[150px] w-[164px]" aria-hidden="true">
+      <defs>
+        <radialGradient id="veda-star" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#ff4a1c" />
+          <stop offset="55%" stopColor="#ff6333" />
+          <stop offset="100%" stopColor="#ff9a70" />
+        </radialGradient>
+      </defs>
+
+      <path d={starPath(205, 105, 105)} fill="url(#veda-star)" className="animate-twinkle" />
       <path
-        d="M70 12l7.5 22.5L100 42l-22.5 7.5L70 72l-7.5-22.5L40 42l22.5-7.5z"
-        fill="#f4632a"
-        className="animate-twinkle"
-      />
-      <path
-        d="M40 62l5.5 16.5L62 84l-16.5 5.5L40 106l-5.5-16.5L18 84l16.5-5.5z"
-        fill="#f4632a"
+        d={starPath(118, 208, 70)}
+        fill="url(#veda-star)"
         className="animate-twinkle"
         style={{ animationDelay: "0.35s" }}
       />
-      <circle cx="30" cy="46" r="4.5" fill="#f4632a" />
       <path
-        d="M86 78l3 9 9 3-9 3-3 9-3-9-9-3 9-3z"
-        fill="#f4632a"
-        opacity="0.75"
+        d={starPath(290, 214, 34)}
+        fill="url(#veda-star)"
+        opacity="0.72"
         className="animate-twinkle"
         style={{ animationDelay: "0.7s" }}
       />
+      <circle cx="70" cy="116" r="13" fill="#ff8a5c" />
     </svg>
   );
 }

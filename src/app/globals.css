@@ -10,20 +10,25 @@
   --color-surface: #ffffff;
   --color-surface-muted: #f5f5f5;
 
-  --color-ink: #17171a;
-  --color-ink-soft: #4a4a52;
-  --color-ink-faint: #8b8b94;
+  --color-ink: #202024;
+  --color-ink-soft: #6e6e73;
+  --color-ink-faint: #8f8f96;
 
-  --color-accent: #f4632a;
-  --color-accent-soft: #fde3d6;
-  --color-accent-tint: #fff3ec;
+  /* Sampled from the Figma export: a vivid orange-red, not a burnt orange. */
+  --color-accent: #ff5c29;
+  --color-accent-soft: #ffefe7;
+  --color-accent-tint: #fff5f0;
 
-  --color-good: #16a34a;
-  --color-good-soft: #dcfce7;
-  --color-bad: #ef4444;
-  --color-bad-soft: #fee2e2;
-  --color-warn: #d97706;
-  --color-warn-soft: #fef3c7;
+  /* Two peach steps for the concentric rings on the upload illustration. */
+  --color-peach-outer: #fdf1ec;
+  --color-peach-inner: #f9d5c4;
+
+  --color-good: #1ba05a;
+  --color-good-soft: #e6f7ec;
+  --color-bad: #e5484d;
+  --color-bad-soft: #fde8e8;
+  --color-warn: #e08a1e;
+  --color-warn-soft: #fff0e0;
 
   --color-line: #e4e4e7;
 

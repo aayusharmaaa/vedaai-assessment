@@ -10,7 +10,8 @@ import {
 import { useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
-import type { AssessmentResult, MappedResult } from "@/lib/types";
+import { normalizeLabel, numericPart, subPart } from "@/lib/mapping";
+import type { AssessmentResult, ExtractedQuestion, MappedResult } from "@/lib/types";
 
 type Filter = "all" | "answered" | "unanswered" | "flagged";
 
@@ -25,16 +26,33 @@ export interface QuestionListProps {
   onSelect: (selection: Selection) => void;
 }
 
+/**
+ * Split a printed number into the part that goes inside the circle and the
+ * sub-part label that sits beside it: "7 (a)" renders as a "7" disc plus "a".
+ */
+function splitNumber(q: ExtractedQuestion): { main: string; sub: string | null } {
+  const key = normalizeLabel(q.number);
+  const n = numericPart(key);
+  const sub = subPart(key);
+
+  if (n === null) return { main: q.number, sub: null };
+  return { main: String(n), sub: sub || null };
+}
+
 function MarksPill({ result }: { result: MappedResult }) {
   const g = result.grade;
   if (!g) return null;
 
+  // The design tones by proportion, not by "was it full marks" — 4/5 reads
+  // green, 1/3 reads amber, 0/2 reads red.
+  const ratio = g.max > 0 ? g.awarded / g.max : 0;
+
   const tone =
-    result.status !== "answered"
-      ? "bg-surface-muted text-ink-faint"
-      : g.verdict === "correct"
+    result.status !== "answered" && g.awarded === 0
+      ? "bg-bad-soft text-bad"
+      : ratio >= 0.7
         ? "bg-good-soft text-good"
-        : g.verdict === "partial"
+        : ratio > 0
           ? "bg-warn-soft text-warn"
           : "bg-bad-soft text-bad";
 
@@ -45,7 +63,7 @@ function MarksPill({ result }: { result: MappedResult }) {
         tone,
       )}
     >
-      {g.awarded}/{g.max}
+      {g.awarded} / {g.max}
     </span>
   );
 }
@@ -192,6 +210,10 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
               ),
             ].sort((a, b) => a - b);
 
+            // The disc shows the paper's own number, not a running index, so
+            // "11 (a)" and "11 (b)" both read as 11 with the sub-part beside.
+            const { main, sub } = splitNumber(q);
+
             return (
               <div key={q.id}>
                 {showSection && (
@@ -215,39 +237,50 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
                     type="button"
                     onClick={() => onSelect({ kind: "question", id: q.id })}
                     aria-expanded={open}
-                    className="flex w-full items-start gap-3 p-3.5 text-left lg:gap-4 lg:p-4"
+                    className="w-full p-3.5 text-left lg:p-4"
                   >
-                    <span
-                      className={cn(
-                        "grid h-8 w-8 shrink-0 place-items-center rounded-full text-[13px] font-bold",
-                        result.status === "answered"
-                          ? "bg-ink text-white"
-                          : "border-2 border-line bg-white text-ink-faint",
-                      )}
-                    >
-                      {q.order + 1}
-                    </span>
+                    {/*
+                      Order swaps by breakpoint, so the question text can sit
+                      inline on desktop and wrap to its own full-width row on
+                      mobile without being rendered twice.
+                    */}
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-2.5 lg:flex-nowrap lg:items-start lg:gap-x-4">
+                      <span
+                        className={cn(
+                          "order-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-[13px] font-bold",
+                          result.status === "answered"
+                            ? "bg-ink text-white"
+                            : "border-2 border-line bg-white text-ink-faint",
+                        )}
+                      >
+                        {main}
+                      </span>
 
-                    <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="rounded-md bg-surface-muted px-1.5 py-0.5 text-[12px] font-bold text-ink-soft">
-                          Q{q.number}
+                      {sub && (
+                        <span className="order-1 -ml-1.5 shrink-0 text-[14px] font-bold text-ink">
+                          {sub}.
                         </span>
+                      )}
+
+                      {/* order-1 keeps the badge in the number row; the flex
+                          default of 0 would float it ahead of the disc. */}
+                      <span className="order-1">
                         <StatusNote result={result} />
                       </span>
-                      <span className="mt-1.5 block text-[14.5px] font-medium leading-snug text-ink lg:text-[15px]">
+
+                      <span className="order-3 w-full text-[14.5px] font-medium leading-snug text-ink lg:order-2 lg:mt-1 lg:w-auto lg:min-w-0 lg:flex-1 lg:text-[15px]">
                         {q.text}
                       </span>
-                    </span>
 
-                    <span className="flex shrink-0 items-center gap-2">
-                      <MarksPill result={result} />
-                      <ChevronDown
-                        className={cn(
-                          "h-5 w-5 text-ink-faint transition-transform",
-                          open && "rotate-180",
-                        )}
-                      />
+                      <span className="order-2 ml-auto flex shrink-0 items-center gap-2 lg:order-3 lg:ml-0">
+                        <MarksPill result={result} />
+                        <ChevronDown
+                          className={cn(
+                            "h-5 w-5 text-ink-faint transition-transform",
+                            open && "rotate-180",
+                          )}
+                        />
+                      </span>
                     </span>
                   </button>
 
