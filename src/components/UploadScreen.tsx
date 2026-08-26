@@ -26,17 +26,20 @@ interface Slot {
 const EMPTY: Slot = { files: [], pages: null, error: null };
 
 /**
- * Chips riding the ring, at the angles used in the reference artwork.
- * 0 degrees is 3 o'clock, increasing clockwise.
+ * Icons riding the ring, in clockwise order.
+ *
+ * Angles are derived from the count rather than hand-placed, so the chips are
+ * evenly spaced by construction and stay that way if one is added or removed.
+ * Hand-measured angles drifted badly: gaps of 43 degrees next to 137 made two
+ * chips look clustered while a quarter of the ring sat empty.
  */
-const ORBIT_CHIPS = [
-  { angle: -66, Icon: Clock },
-  { angle: 157, Icon: ListChecks },
-  { angle: 19, Icon: CloudCog },
-  { angle: 114, Icon: Settings },
-];
+const ORBIT_ICONS = [Clock, ListChecks, CloudCog, Settings];
+
+/** Rotates the whole set so the first chip sits upper-right, as in the design. */
+const ORBIT_START_ANGLE = -60;
 
 /** Radius, in px, of the ring the chips travel along. */
+
 const ORBIT_RADIUS = 80;
 
 /** Where the artwork lives once dropped into public/. */
@@ -84,7 +87,8 @@ function TeacherBadge() {
         travel round.
       */}
       <div className="pointer-events-none absolute inset-0 animate-orbit">
-        {ORBIT_CHIPS.map(({ angle, Icon }, i) => {
+        {ORBIT_ICONS.map((Icon, i) => {
+          const angle = ORBIT_START_ANGLE + (i * 360) / ORBIT_ICONS.length;
           const rad = (angle * Math.PI) / 180;
           return (
             <span
