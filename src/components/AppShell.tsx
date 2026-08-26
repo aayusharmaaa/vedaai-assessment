@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { ArtworkImage } from "@/components/ArtworkImage";
 import { cn } from "@/lib/cn";
 
 /**
@@ -27,6 +28,9 @@ import { cn } from "@/lib/cn";
  * dead button.
  */
 const OUT_OF_SCOPE = "Presentational only — this build covers the Exams flow";
+
+/** School crest artwork, once dropped into public/. */
+const SCHOOL_CREST = "/school-crest.png";
 
 /** The signed-in teacher. Static: the brief specifies no authentication. */
 const TEACHER = { name: "Pratyush Upadhyay", initials: "PU" };
@@ -54,16 +58,22 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
 
 function SchoolCard({ compact = false }: { compact?: boolean }) {
   const crest = (
-    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-white">
-      <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden="true">
-        <path
-          d="M16 3l11 4v9c0 6.6-4.6 11.6-11 13C9.6 27.6 5 22.6 5 16V7l11-4z"
-          fill="none"
-          stroke="#2f6b3a"
-          strokeWidth="1.8"
-        />
-        <path d="M16 9v11M11 13h10M12 24h8" stroke="#2f6b3a" strokeWidth="1.6" fill="none" />
-      </svg>
+    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-white">
+      <ArtworkImage
+        src={SCHOOL_CREST}
+        className="h-full w-full object-contain p-[3px]"
+        fallback={
+          <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden="true">
+            <path
+              d="M16 3l11 4v9c0 6.6-4.6 11.6-11 13C9.6 27.6 5 22.6 5 16V7l11-4z"
+              fill="none"
+              stroke="#2f6b3a"
+              strokeWidth="1.8"
+            />
+            <path d="M16 9v11M11 13h10M12 24h8" stroke="#2f6b3a" strokeWidth="1.6" fill="none" />
+          </svg>
+        }
+      />
     </div>
   );
 

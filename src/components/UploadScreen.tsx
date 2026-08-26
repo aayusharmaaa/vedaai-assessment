@@ -3,6 +3,7 @@
 import { ArrowRight, FileText, Sparkles, Upload, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ArtworkImage } from "@/components/ArtworkImage";
 import { cn } from "@/lib/cn";
 import { ACCEPTED_TYPES, countPages, formatBytes, MAX_FILE_BYTES } from "@/lib/pdf";
 
@@ -30,37 +31,17 @@ const ORBIT_RADIUS = 68;
 const TEACHER_IMAGE = "/teacher.png";
 
 function TeacherBadge() {
-  // Falls back to the inline illustration if the artwork has not been added,
-  // so the upload screen never renders an empty disc.
-  const [artworkOk, setArtworkOk] = useState(true);
-  const artworkRef = useRef<HTMLImageElement>(null);
-
-  // The image is server-rendered, so a 404 can resolve before React attaches
-  // onError during hydration. Re-check on mount, or the broken image sticks.
-  useEffect(() => {
-    const el = artworkRef.current;
-    if (el?.complete && el.naturalWidth === 0) setArtworkOk(false);
-  }, []);
-
   return (
     <div className="relative mx-auto h-[172px] w-[172px] shrink-0">
       {/* Outer wash, then a stronger peach ring, then the white portrait disc. */}
       <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
       <div className="absolute inset-[10px] rounded-full bg-peach-inner" />
       <div className="absolute inset-[36px] overflow-hidden rounded-full bg-white shadow-inner">
-        {artworkOk ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            ref={artworkRef}
-            src={TEACHER_IMAGE}
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            onError={() => setArtworkOk(false)}
-            className="h-full w-full select-none object-cover"
-          />
-        ) : (
-        <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
+        <ArtworkImage
+          src={TEACHER_IMAGE}
+          className="h-full w-full select-none object-cover"
+          fallback={
+            <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
           <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
 
           {/* Blazer and shoulders */}
@@ -92,9 +73,10 @@ function TeacherBadge() {
             <path d="M70 100h18M70 104h18M70 108h12" stroke="#c9c9d1" strokeWidth="1.6" strokeLinecap="round" />
           </g>
           {/* Forearm across the body */}
-          <path d="M44 104c6 6 16 8 24 6" stroke="#e8b78f" strokeWidth="7" fill="none" strokeLinecap="round" />
-        </svg>
-        )}
+              <path d="M44 104c6 6 16 8 24 6" stroke="#e8b78f" strokeWidth="7" fill="none" strokeLinecap="round" />
+            </svg>
+          }
+        />
       </div>
 
       {/*

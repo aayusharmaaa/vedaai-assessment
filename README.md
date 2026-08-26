@@ -178,6 +178,19 @@ mapping on any paper printing "Q1".
 
 ---
 
+## Brand artwork
+
+Two supplied images are referenced but not committed, since they are brand assets
+rather than code. Drop them into `public/` and they are picked up on next load:
+
+| File | Where it appears |
+| --- | --- |
+| `public/teacher.png` | The portrait inside the rings on the upload screen |
+| `public/school-crest.png` | The school crest in the sidebar card |
+
+Until they are present, `ArtworkImage` renders an inline SVG stand-in, so the app
+never shows a broken image. Both paths are verified.
+
 ## Assumptions
 
 - **One student per run.** The brief specifies one answer sheet.
