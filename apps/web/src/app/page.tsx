@@ -142,7 +142,7 @@ export default function Page() {
       )}
 
       {phase === "review" && result && (
-        <ReviewScreen data={result} answerPages={answerPages} onRestart={reset} />
+        <ReviewScreen data={result} answerPages={answerPages} />
       )}
     </AppShell>
   );

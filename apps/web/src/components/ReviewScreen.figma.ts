@@ -8,7 +8,6 @@ export default {
     <ReviewScreen
       data={assessmentResult}
       answerPages={answerPages}
-      onRestart={() => undefined}
     />
   `,
   imports: ['import { ReviewScreen } from "@/components/ReviewScreen"'],
