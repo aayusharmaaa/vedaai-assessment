@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 
 import "./globals.css";
 
@@ -10,6 +10,13 @@ const figtree = Figtree({
   display: "swap",
 });
 
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "VedaAI · Exam Assessment",
   description:
@@ -17,14 +24,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ebebeb",
+  themeColor: "#eeeeee",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={figtree.variable}>
+    <html lang="en" className={`${figtree.variable} ${bricolage.variable}`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

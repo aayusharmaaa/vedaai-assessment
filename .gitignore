@@ -14,3 +14,14 @@ next-env.d.ts
 
 # Copied from pdfjs-dist by postinstall, not source.
 apps/web/public/pdf.worker.min.mjs
+
+# Local source assets — processed copies live in apps/web/public/
+/school.png
+/user.png
+/extracting.png
+/image.png
+/logo.png
+/nav.png
+/toolkit.png
+/toolkit small.png
+/top buttons.png

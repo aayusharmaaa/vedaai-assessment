@@ -228,7 +228,7 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
                     // bg-* utilities would leave the winner up to stylesheet order.
                     "rounded-[18px] border-2 transition",
                     isSelected
-                      ? "border-accent bg-surface shadow-[0_2px_10px_rgba(244,99,42,0.12)]"
+                      ? "border-accent bg-surface shadow-[0_2px_10px_rgba(255,87,34,0.12)]"
                       : "border-transparent bg-[#fafafa] hover:border-line",
                     result.status !== "answered" && !isSelected && "opacity-95",
                   )}

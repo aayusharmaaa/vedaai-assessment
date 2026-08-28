@@ -2,11 +2,7 @@
 
 import {
   ArrowRight,
-  Clock,
-  CloudCog,
   FileText,
-  ListChecks,
-  Settings,
   Sparkles,
   Upload,
   X,
@@ -25,88 +21,39 @@ interface Slot {
 
 const EMPTY: Slot = { files: [], pages: null, error: null };
 
-/**
- * Icons riding the ring, in clockwise order.
- *
- * Angles are derived from the count rather than hand-placed, so the chips are
- * evenly spaced by construction and stay that way if one is added or removed.
- * Hand-measured angles drifted badly: gaps of 43 degrees next to 137 made two
- * chips look clustered while a quarter of the ring sat empty.
- */
-const ORBIT_ICONS = [Clock, ListChecks, CloudCog, Settings];
-
-/** Rotates the whole set so the first chip sits upper-right, as in the design. */
-const ORBIT_START_ANGLE = -60;
-
-/** Radius, in px, of the ring the chips travel along. */
-
-const ORBIT_RADIUS = 80;
-
-/** Where the artwork lives once dropped into public/. */
-const TEACHER_IMAGE = "/teacher.png";
+/** Static teacher graphic from Figma — rings and icons are baked into the PNG. */
+const TEACHER_GRAPHIC = "/image.png";
 
 function TeacherBadge() {
   return (
-    <div className="relative mx-auto h-[200px] w-[200px] shrink-0">
-      {/* Concentric rings: soft outer wash, saturated inner band, white disc. */}
-      <div className="absolute inset-0 animate-pulse-ring rounded-full bg-peach-outer" />
-      <div className="absolute inset-[8%] rounded-full bg-peach-inner" />
-      <div className="absolute inset-[23%] rounded-full bg-white" />
-
-      {/*
-        The portrait deliberately overflows the white disc: her head rises past
-        it onto the salmon ring, which is what gives the badge its depth in the
-        reference. Clipping her inside the circle flattens it, so there is no
-        overflow-hidden here - the artwork's own transparency does the framing.
-      */}
+    <div className="relative mx-auto h-[168px] w-[168px] shrink-0 lg:h-[180px] lg:w-[180px]">
       <ArtworkImage
-        src={TEACHER_IMAGE}
-        className="absolute bottom-[26%] left-1/2 w-[74%] -translate-x-1/2 select-none"
+        src={TEACHER_GRAPHIC}
+        className="h-full w-full select-none object-contain"
         fallback={
-          <span className="absolute inset-[23%] overflow-hidden rounded-full">
-            <svg viewBox="0 0 120 120" className="h-full w-full" aria-hidden="true">
-              <circle cx="60" cy="60" r="60" fill="#f7f7f8" />
-              <path d="M26 120c0-17 12-29 26-32h16c14 3 26 15 26 32z" fill="#33333c" />
-              <path d="M52 88l8 11 8-11-4-2h-8z" fill="#f6f6f8" />
-              <path d="M54 74h12v12c0 3-12 3-12 0z" fill="#dda87e" />
-              <path d="M38 52c0-14 9-23 22-23s22 9 22 23v10c0 4-3 5-4 2l-2-7c-11 2-25 1-32-4v9c-1 3-6 2-6-2z" fill="#2b2b33" />
-              <ellipse cx="60" cy="54" rx="16" ry="18" fill="#e8b78f" />
-              <path d="M44 47c3-9 9-13 16-13s13 4 16 13c-7-4-25-4-32 0z" fill="#2b2b33" />
-              <rect x="46" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
-              <rect x="61.5" y="50" width="12.5" height="9.5" rx="4.75" fill="#fff" fillOpacity=".55" stroke="#2b2b33" strokeWidth="1.7" />
-              <path d="M58.5 54.5h3" stroke="#2b2b33" strokeWidth="1.7" />
-              <path d="M55 65c3 2.5 7 2.5 10 0" stroke="#b97c53" strokeWidth="1.9" fill="none" strokeLinecap="round" />
-            </svg>
+          <span className="grid h-full w-full place-items-center rounded-full bg-peach-outer text-[13px] font-medium text-ink-faint">
+            Teacher
           </span>
         }
       />
-
-      {/*
-        The ring rotates as one group while each chip counter-rotates at the
-        same rate, so the glyphs stay upright rather than tumbling as they
-        travel round.
-      */}
-      <div className="pointer-events-none absolute inset-0 animate-orbit">
-        {ORBIT_ICONS.map((Icon, i) => {
-          const angle = ORBIT_START_ANGLE + (i * 360) / ORBIT_ICONS.length;
-          const rad = (angle * Math.PI) / 180;
-          return (
-            <span
-              key={i}
-              style={{
-                left: `calc(50% + ${Math.cos(rad) * ORBIT_RADIUS}px)`,
-                top: `calc(50% + ${Math.sin(rad) * ORBIT_RADIUS}px)`,
-              }}
-              className="absolute -ml-[15px] -mt-[15px] block h-[30px] w-[30px]"
-            >
-              <span className="animate-orbit-counter grid h-full w-full place-items-center rounded-full bg-accent shadow-[0_3px_8px_rgba(255,92,41,0.35)]">
-                <Icon className="h-[16px] w-[16px] text-white" strokeWidth={2.4} />
-              </span>
-            </span>
-          );
-        })}
-      </div>
     </div>
+  );
+}
+
+function displayBytes(bytes: number): string {
+  return formatBytes(bytes).replace(/\.0(?=[A-Z])/i, "");
+}
+
+function FileTypeIcon({ isPdf }: { isPdf: boolean }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={isPdf ? "/pdf-icon.svg" : "/image-file-icon.svg"}
+      alt=""
+      aria-hidden
+      className="h-10 w-[35px] shrink-0 object-contain"
+      draggable={false}
+    />
   );
 }
 
@@ -114,29 +61,33 @@ function FileCard({ file, pages, onRemove }: { file: File; pages: number | null;
   const isPdf = file.type === "application/pdf";
 
   return (
-    <div className="relative flex items-center gap-3 rounded-2xl bg-surface-muted px-4 py-3">
-      <span
-        className={cn(
-          "grid h-11 w-9 shrink-0 place-items-center rounded-md text-[10px] font-extrabold text-white",
-          isPdf ? "bg-[#e5493a]" : "bg-[#3b82f6]",
-        )}
-      >
-        {isPdf ? "PDF" : "IMG"}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-bold leading-tight">{file.name}</p>
-        <p className="text-[13px] text-ink-faint">
-          {formatBytes(file.size)}
-          {pages !== null && ` • ${pages} Page${pages === 1 ? "" : "s"}`}
-        </p>
+    <div className="font-bricolage relative w-full pt-[9px]">
+      <div className="flex min-h-[66px] items-center gap-3 rounded-xl bg-[#f6f6f6] py-3 pl-3 pr-5">
+        <FileTypeIcon isPdf={isPdf} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[16px] font-bold leading-[1.4] text-[#2b2b2b]">{file.name}</p>
+          <div className="mt-0 flex items-center gap-2">
+            <span className="text-[14px] font-normal leading-[1.4] text-[rgba(94,94,94,0.8)]">
+              {displayBytes(file.size)}
+            </span>
+            {pages !== null && (
+              <>
+                <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-[rgba(94,94,94,0.8)]" />
+                <span className="text-[14px] font-normal leading-[1.4] text-[rgba(94,94,94,0.8)]">
+                  {pages} Page{pages === 1 ? "" : "s"}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${file.name}`}
-        className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-[#5b5b63] text-white shadow transition hover:bg-ink"
+        className="absolute right-0 top-0 grid h-[25.6px] w-[25.6px] place-items-center rounded-full bg-[rgba(43,43,43,0.8)] shadow-[0_4px_11.4px_rgba(0,0,0,0.25)] transition hover:bg-[rgba(43,43,43,0.95)]"
       >
-        <X className="h-4 w-4" />
+        <X className="h-4 w-4 text-[#efe4dc]" strokeWidth={1.6} />
       </button>
     </div>
   );
@@ -179,8 +130,8 @@ function DropZone({
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={cn(
-        "flex min-h-[220px] flex-col justify-center rounded-[20px] border-2 border-dashed p-5 transition",
-        dragging ? "border-accent bg-accent-tint" : "border-[#d4d4d8] bg-surface",
+        "shadow-card flex min-h-[156px] flex-col justify-center rounded-2xl border border-dashed p-3.5 transition",
+        dragging ? "border-accent bg-accent-tint" : "border-[#d1d5db] bg-surface",
       )}
     >
       <input
@@ -198,7 +149,7 @@ function DropZone({
       />
 
       {filled ? (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {slot.files.map((f, i) => (
             <FileCard
               key={`${f.name}-${i}`}
@@ -219,15 +170,15 @@ function DropZone({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex flex-col items-center gap-3 py-4 text-center"
+          className="flex flex-col items-center gap-2 py-2.5 text-center"
         >
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-surface-muted">
-            <Upload className="h-[22px] w-[22px] text-ink" />
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#f3f4f6]">
+            <Upload className="h-[18px] w-[18px] text-ink-soft" />
           </span>
-          <span className="text-[19px] font-bold">
-            Upload <span className="text-accent">{title}</span>
+          <span className="font-bricolage text-[16px] font-bold">
+            Upload <span className="accent-mark font-bold">{title}</span>
           </span>
-          <span className="text-[14px] text-ink-faint">Max 10MB</span>
+          <span className="text-[12px] text-ink-faint">Max 10MB</span>
         </button>
       )}
 
@@ -293,39 +244,40 @@ export function UploadScreen({ onStart, onSample, hasApiKey }: UploadScreenProps
 
   return (
     <div className="h-full overflow-y-auto scrollbar-slim">
-      <div className="mx-auto flex min-h-full max-w-[1100px] flex-col items-center px-4 py-8 lg:justify-center lg:py-6">
-        <h1 className="text-center text-[30px] font-extrabold leading-tight tracking-tight lg:text-[46px]">
-          Upload <span className="accent-mark text-accent">Question Paper &amp; Answer Sheets</span>
-        </h1>
-        <p className="mt-3 text-center text-[16px] text-ink-soft lg:text-[19px]">
-          Upload both files to get started
-        </p>
+      <div className="mx-auto flex min-h-full w-full max-w-[960px] flex-col items-center px-5 py-8 lg:justify-center lg:px-6 lg:py-10">
+        <div className="font-bricolage w-full text-center">
+          <h1 className="text-[22px] font-bold leading-[1.2] text-[#2b2b2b] sm:text-[28px] lg:whitespace-nowrap lg:text-[40px]">
+            Upload{" "}
+            <span className="accent-mark font-bold">Question Paper &amp; Answer Sheets</span>
+          </h1>
+          <p className="mt-3 text-[17px] font-normal leading-[1.4] text-[#303030] lg:text-[20px]">
+            Upload both files to get started
+          </p>
+        </div>
 
-        <div className="my-5 lg:my-6">
+        <div className="my-3 lg:my-4">
           <TeacherBadge />
         </div>
 
-        <div className="w-full rounded-[26px] bg-[#f1f1f1] p-3 lg:p-4">
-          <div className="grid gap-3 lg:grid-cols-2 lg:gap-4">
-            <DropZone
-              id="question-paper"
-              title="Question Paper"
-              slot={qp}
-              onFiles={makeHandler(setQp)}
-              onClear={(i) =>
-                setQp((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
-              }
-            />
-            <DropZone
-              id="answer-sheet"
-              title="Answer Sheet"
-              slot={as}
-              onFiles={makeHandler(setAs)}
-              onClear={(i) =>
-                setAs((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
-              }
-            />
-          </div>
+        <div className="grid w-full gap-2.5 lg:grid-cols-2 lg:gap-3">
+          <DropZone
+            id="question-paper"
+            title="Question Paper"
+            slot={qp}
+            onFiles={makeHandler(setQp)}
+            onClear={(i) =>
+              setQp((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
+            }
+          />
+          <DropZone
+            id="answer-sheet"
+            title="Answer Sheet"
+            slot={as}
+            onFiles={makeHandler(setAs)}
+            onClear={(i) =>
+              setAs((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
+            }
+          />
         </div>
 
         <button
@@ -333,37 +285,38 @@ export function UploadScreen({ onStart, onSample, hasApiKey }: UploadScreenProps
           disabled={!ready}
           onClick={() => onStart(qp.files, as.files)}
           className={cn(
-            "mt-7 flex h-[54px] items-center gap-2.5 rounded-full px-8 text-[17px] font-semibold transition",
+            "mt-5 flex h-[44px] min-w-[188px] items-center justify-center gap-2 rounded-full px-7 text-[15px] font-semibold transition",
             ready
-              ? "bg-ink text-white shadow-lg hover:bg-black"
+              ? "bg-ink text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] hover:bg-black"
               : "cursor-not-allowed bg-[#c9c9cd] text-white",
           )}
         >
           Start Mapping
-          <ArrowRight className="h-5 w-5" />
+          <ArrowRight className="h-4 w-4" />
         </button>
 
-        <p className="mt-4 max-w-[560px] text-center text-[14px] text-ink-faint">
+        <p className="font-bricolage mt-2.5 text-center text-[14px] font-normal leading-[22px] tracking-[-0.06em] text-[rgba(94,94,94,0.8)] lg:whitespace-nowrap">
           Once both files are uploaded, you&apos;ll able to map answers with questions
         </p>
 
-        <button
-          type="button"
-          onClick={onSample}
-          className="mt-6 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-[14px] font-semibold text-ink-soft transition hover:border-accent hover:text-accent"
-        >
-          <Sparkles className="h-4 w-4 text-accent" />
-          {hasApiKey ? "Or explore a worked sample" : "Explore the worked sample"}
-        </button>
-
         {!hasApiKey && (
-          <p className="mt-4 flex max-w-[560px] items-start gap-2 rounded-2xl bg-warn-soft px-4 py-3 text-[13px] text-[#92400e]">
-            <FileText className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>
-              No <code className="font-mono font-semibold">GEMINI_API_KEY</code> is configured, so
-              live extraction is unavailable. The worked sample below demonstrates the full flow.
-            </span>
-          </p>
+          <>
+            <button
+              type="button"
+              onClick={onSample}
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-[14px] font-semibold text-ink-soft transition hover:border-accent hover:text-accent"
+            >
+              <Sparkles className="h-4 w-4 text-accent" />
+              Explore the worked sample
+            </button>
+            <p className="mt-4 flex max-w-[560px] items-start gap-2 rounded-2xl bg-warn-soft px-4 py-3 text-[13px] text-[#92400e]">
+              <FileText className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                No <code className="font-mono font-semibold">GEMINI_API_KEY</code> is configured, so
+                live extraction is unavailable. The worked sample below demonstrates the full flow.
+              </span>
+            </p>
+          </>
         )}
       </div>
     </div>

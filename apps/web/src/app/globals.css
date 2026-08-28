@@ -6,22 +6,23 @@
  * near-black for primary actions, and green/red only for grading signals.
  */
 @theme {
-  --color-canvas: #ebebeb;
+  --color-canvas: #eeeeee;
+  --color-canvas-end: #dadada;
   --color-surface: #ffffff;
-  --color-surface-muted: #f5f5f5;
+  --color-surface-muted: #f0f0f0;
 
   --color-ink: #202024;
   --color-ink-soft: #6e6e73;
   --color-ink-faint: #8f8f96;
 
-  /* Sampled from the Figma export: a vivid orange-red, not a burnt orange. */
-  --color-accent: #ff5c29;
-  --color-accent-soft: #ffefe7;
+  /* Figma Primary/primary - Orange */
+  --color-accent: #ff5623;
+  --color-accent-soft: #ffd8c4;
   --color-accent-tint: #fff5f0;
 
   /* Two salmon steps for the concentric rings on the upload illustration. */
-  --color-peach-outer: #f6dbd2;
-  --color-peach-inner: #edb3a1;
+  --color-peach-outer: #f8e4dc;
+  --color-peach-inner: #f0c4b4;
 
   --color-good: #1ba05a;
   --color-good-soft: #e6f7ec;
@@ -57,10 +58,29 @@ body {
 }
 
 body {
-  background: var(--color-canvas);
+  background: linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-end) 100%);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Figma token: Background/bg - Gradient — linear #EEEEEE → #DADADA */
+.canvas-gradient {
+  background: linear-gradient(180deg, #eeeeee 0%, #dadada 100%);
+}
+
+/* Elevation tokens from the Figma chrome */
+.shadow-sidebar {
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+}
+.shadow-header {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.shadow-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+.shadow-control {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 /* The app owns its own scroll regions; the page itself never scrolls. */
@@ -88,11 +108,18 @@ body {
   }
 }
 
-/* Marker-pen underline used on the headline accent words. */
+/* Bricolage Grotesque tokens (Figma typography). */
+.font-bricolage {
+  font-family: var(--font-bricolage), var(--font-sans);
+  letter-spacing: -0.04em;
+}
+
+/* Orange headline highlight — semi-transparent pill behind accent words. */
 .accent-mark {
-  background: var(--color-accent-soft);
+  color: #ff5623;
+  background: rgba(255, 86, 35, 0.14);
   border-radius: 0.5rem;
-  padding: 0.05em 0.3em;
+  padding: 0.02em 0.28em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }

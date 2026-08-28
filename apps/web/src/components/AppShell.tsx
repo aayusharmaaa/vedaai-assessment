@@ -5,21 +5,16 @@ import {
   Bell,
   ChevronDown,
   Clipboard,
-  ClipboardList,
-  FileText,
   HelpCircle,
-  LayoutGrid,
   Menu,
-  MonitorPlay,
-  PanelLeft,
-  PieChart,
   Settings,
   Sparkles,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { ArtworkImage } from "@/components/ArtworkImage";
+import { NavIcon, type NavIconId } from "@/components/NavIcons";
 import { cn } from "@/lib/cn";
 
 /**
@@ -35,7 +30,7 @@ const OUT_OF_SCOPE = "Presentational only — this build covers the Exams flow";
  * 36x36, white background, fully rounded, contents centred.
  */
 const TOP_BAR_CONTROL =
-  "grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-ink transition hover:bg-surface-muted";
+  "shadow-control grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-ink transition hover:bg-surface-muted";
 
 /** Inert chrome keeps the arrow cursor so it does not invite a click. */
 const TOP_BAR_INERT = "cursor-default";
@@ -46,36 +41,82 @@ const USER_AVATAR = "/user.png";
 /** School crest artwork, once dropped into public/. */
 const SCHOOL_CREST = "/school-crest.png";
 
-/** The signed-in teacher. Static: the brief specifies no authentication. */
-const TEACHER = { name: "Pratyush Upadhyay", initials: "PU" };
+/** Collapsed-sidebar school tile from Figma export. */
+const SCHOOL_CREST_COMPACT = "/school-crest-compact.png";
 
-const NAV = [
-  { label: "Home", icon: LayoutGrid },
-  { label: "My Classroom", icon: MonitorPlay },
-  { label: "Assignments", icon: FileText },
-  { label: "Exams", icon: ClipboardList, active: true },
-  { label: "My Library", icon: PieChart },
+/** Collapsed-sidebar expand chevron from Figma export. */
+const SIDEBAR_EXPAND = "/sidebar-expand.png";
+
+/** Full wordmark from Figma export. */
+const VEDAAI_LOGO = "/vedaai-logo.png";
+
+/** The signed-in teacher. Static: the brief specifies no authentication. */
+const TEACHER = { name: "Madhur Rastogi", initials: "MR" };
+
+/** Collapsed rail — 80px wide, 40px nav targets, 100px toolkit (h-25). */
+const COLLAPSED_RAIL = "w-[80px]";
+const COLLAPSED_BTN = "h-10 w-10";
+const COLLAPSED_TOOLKIT = "h-35 w-35";
+const COLLAPSED_ICON = "h-5 w-5";
+
+function ShellIcon({ src, className }: { src: string; className?: string }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      aria-hidden
+      draggable={false}
+      className={cn(COLLAPSED_ICON, "shrink-0 object-contain", className)}
+    />
+  );
+}
+
+const NAV: { label: string; icon: NavIconId; active?: boolean }[] = [
+  { label: "Home", icon: "home" },
+  { label: "My Classroom", icon: "classroom" },
+  { label: "Assignments", icon: "assignments" },
+  { label: "Exams", icon: "exams", active: true },
+  { label: "My Library", icon: "library" },
 ];
 
 function Wordmark({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-ink">
-        <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
-          <path d="M4 5h5.2l2.8 8.4L14.8 5H20l-6 14h-4L4 5z" fill="#fff" />
-        </svg>
-      </div>
-      {!compact && <span className="text-[22px] font-extrabold tracking-tight">VedaAI</span>}
-    </div>
+    <ArtworkImage
+      src={compact ? "/vedaai-icon.png" : VEDAAI_LOGO}
+      className={cn(
+        "shrink-0 object-contain object-left",
+        compact ? "h-9 w-9" : "h-8 w-[132px]",
+      )}
+      fallback={
+        <span className="text-[20px] font-extrabold tracking-tight text-[#2b2b2b]">
+          {compact ? "V" : "VedaAI"}
+        </span>
+      }
+    />
   );
 }
 
 function SchoolCard({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <ArtworkImage
+        src={SCHOOL_CREST_COMPACT}
+        className="h-10 w-10 shrink-0 object-contain"
+        fallback={
+          <div className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-white p-1">
+            <ArtworkImage src={SCHOOL_CREST} className="h-full w-full object-contain" fallback={null} />
+          </div>
+        }
+      />
+    );
+  }
+
   const crest = (
-    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-white">
+    <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-white p-1">
       <ArtworkImage
         src={SCHOOL_CREST}
-        className="h-full w-full object-contain p-[3px]"
+        className="h-full w-full object-contain"
         fallback={
           <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden="true">
             <path
@@ -91,14 +132,12 @@ function SchoolCard({ compact = false }: { compact?: boolean }) {
     </div>
   );
 
-  if (compact) return crest;
-
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-surface-muted p-3">
       {crest}
       <div className="min-w-0">
-        <p className="truncate text-[15px] font-bold leading-tight">Delhi Public School</p>
-        <p className="truncate text-[13px] text-ink-faint">Bokaro Steel City</p>
+        <p className="truncate text-[14px] font-bold leading-tight">Delhi Public School</p>
+        <p className="truncate text-[12px] text-ink-faint">Bokaro Steel City</p>
       </div>
     </div>
   );
@@ -116,7 +155,12 @@ function SidebarBody({
   showToggle?: boolean;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-y-auto scrollbar-slim p-4">
+    <div
+      className={cn(
+        "flex h-full flex-col overflow-y-auto scrollbar-slim",
+        collapsed ? "items-center p-3" : "p-3.5",
+      )}
+    >
       {/*
         The toggle lives here in both states. Keeping it only at the foot of
         the rail meant that on a short viewport the collapsed sidebar had no
@@ -125,38 +169,60 @@ function SidebarBody({
       <div
         className={cn(
           "flex shrink-0 items-center",
-          collapsed ? "flex-col gap-3" : "justify-between",
+          collapsed ? "flex-col items-center" : "justify-between",
         )}
       >
         <Wordmark compact={collapsed} />
-        {showToggle && (
+        {showToggle && !collapsed && (
           <button
             type="button"
             onClick={onToggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label="Collapse sidebar"
             aria-expanded={!collapsed}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-faint transition hover:bg-surface-muted hover:text-ink"
           >
-            <PanelLeft className={cn("h-5 w-5 transition-transform", collapsed && "rotate-180")} />
+            <ShellIcon src="/panel-toggle.png" className="h-5 w-5 opacity-70" />
           </button>
         )}
       </div>
 
+      <div className={cn("flex w-full shrink-0 items-center justify-center", collapsed ? "mt-4" : "hidden")}>
+        <button
+          type="button"
+          onClick={onNavigate}
+          title={`AI Teacher's Toolkit — ${OUT_OF_SCOPE}`}
+          className={cn(
+            "group mx-auto grid shrink-0 cursor-default place-items-center transition",
+            COLLAPSED_TOOLKIT,
+          )}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/toolkit-collapsed.png"
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="h-full w-full object-contain"
+          />
+        </button>
+      </div>
+
+      {!collapsed && (
       <button
         type="button"
         onClick={onNavigate}
         title={`AI Teacher's Toolkit — ${OUT_OF_SCOPE}`}
-        className={cn(
-          "group mt-8 flex cursor-default items-center justify-center gap-2.5 rounded-full bg-ink text-white shadow-sm ring-[3px] ring-accent transition hover:bg-black",
-          collapsed ? "h-12 w-12 self-center p-0" : "h-[54px] w-full px-4",
-        )}
+        className="group mt-7 flex h-[46px] w-full cursor-default items-center justify-center gap-2 rounded-full bg-[#1a1a1a] px-4 text-white shadow-[0_0_0_1px_#ff5623,0_0_14px_rgba(255,86,35,0.22)] ring-[1.5px] ring-[#ff5623]/90 transition"
       >
-        <Sparkles className="h-[19px] w-[19px] shrink-0 text-white" />
-        {!collapsed && <span className="text-[16px] font-semibold">AI Teacher&apos;s Toolkit</span>}
+        <Sparkles className="h-[17px] w-[17px] shrink-0 text-white" strokeWidth={2} />
+        <span className="font-bricolage text-[15px] font-semibold tracking-[-0.02em] whitespace-nowrap">
+          AI Teacher&apos;s Toolkit
+        </span>
       </button>
+      )}
 
-      <nav className={cn("mt-10 flex flex-col gap-2", collapsed && "items-center")}>
-        {NAV.map(({ label, icon: Icon, active }) => (
+      <nav className={cn("flex flex-col", collapsed ? "mt-4 items-center gap-1" : "mt-8 gap-1.5")}>
+        {NAV.map(({ label, icon, active }) => (
           <button
             key={label}
             type="button"
@@ -164,33 +230,54 @@ function SidebarBody({
             aria-current={active ? "page" : undefined}
             title={active ? (collapsed ? label : undefined) : `${label} — ${OUT_OF_SCOPE}`}
             className={cn(
-              "flex items-center rounded-xl text-[16px] transition",
-              collapsed ? "h-12 w-12 justify-center" : "h-[52px] w-full gap-3.5 px-3.5",
+              "font-bricolage flex items-center rounded-xl text-[16px] leading-[1.4] tracking-[-0.04em] transition",
+              collapsed ? cn("justify-center rounded-lg", COLLAPSED_BTN) : "h-[44px] w-full gap-3 px-3",
               active
-                ? "bg-surface-muted font-semibold text-ink"
-                : "cursor-default font-medium text-ink-soft hover:bg-surface-muted",
+                ? "bg-[#f0f0f0] font-medium text-[#303030]"
+                : "cursor-default font-normal text-[rgba(94,94,94,0.8)] hover:bg-[#f0f0f0]",
             )}
           >
-            <Icon className="h-[21px] w-[21px] shrink-0" />
-            {!collapsed && <span>{label}</span>}
+            <NavIcon id={icon} active={active} />
+            {!collapsed && <span className="flex-1 text-left">{label}</span>}
           </button>
         ))}
       </nav>
 
-      <div className="mt-auto space-y-4 pt-6">
+      <div className={cn("mt-auto pt-6", collapsed ? "flex w-full flex-col items-center gap-3" : "space-y-4")}>
         <button
           type="button"
           onClick={onNavigate}
           title={`Settings — ${OUT_OF_SCOPE}`}
           className={cn(
-            "flex cursor-default items-center rounded-xl font-medium text-ink-soft transition hover:bg-surface-muted",
-            collapsed ? "h-11 w-11 justify-center" : "h-12 w-full gap-3 px-3 text-[15px]",
+            "font-bricolage flex cursor-default items-center rounded-xl text-[16px] leading-[1.4] tracking-[-0.04em] font-normal text-[rgba(94,94,94,0.8)] transition hover:bg-[#f0f0f0]",
+            collapsed ? cn("justify-center rounded-lg", COLLAPSED_BTN) : "h-[44px] w-full gap-3 px-3",
           )}
         >
-          <Settings className="h-[19px] w-[19px] shrink-0" />
+          <Settings className={cn(COLLAPSED_ICON, "shrink-0 text-[rgba(94,94,94,0.8)]")} strokeWidth={2} />
           {!collapsed && <span>Settings</span>}
         </button>
         <SchoolCard compact={collapsed} />
+        {collapsed && showToggle && (
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Expand sidebar"
+            aria-expanded={false}
+            className={cn(
+              "grid shrink-0 place-items-center rounded-lg transition hover:bg-surface-muted",
+              COLLAPSED_BTN,
+            )}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={SIDEBAR_EXPAND}
+              alt=""
+              aria-hidden
+              draggable={false}
+              className="h-3 w-3 shrink-0 object-contain opacity-80"
+            />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -201,23 +288,29 @@ export interface AppShellProps {
   crumb: string;
   /** Shown when the user can step back to the upload screen. */
   onBack?: () => void;
+  /** Default collapse state for desktop sidebar. */
+  defaultCollapsed?: boolean;
   children: React.ReactNode;
 }
 
-export function AppShell({ crumb, onBack, children }: AppShellProps) {
-  const [collapsed, setCollapsed] = useState(false);
+export function AppShell({ crumb, onBack, defaultCollapsed = false, children }: AppShellProps) {
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
+  useEffect(() => {
+    setCollapsed(defaultCollapsed);
+  }, [defaultCollapsed]);
+
   return (
-    <div className="flex h-full min-h-dvh lg:h-dvh lg:overflow-hidden">
+    <div className="flex h-full min-h-dvh lg:h-dvh lg:overflow-hidden lg:pb-3 lg:pl-3 lg:pt-3">
       {/* Desktop sidebar */}
       <aside
         className={cn(
           "hidden shrink-0 transition-[width] duration-300 lg:block",
-          collapsed ? "w-[92px]" : "w-[300px]",
+          collapsed ? COLLAPSED_RAIL : "w-[260px]",
         )}
       >
-        <div className="h-full rounded-r-[28px] bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div className="h-full rounded-[28px] border border-[#e8e8e8] bg-surface shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
           <SidebarBody collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
         </div>
       </aside>
@@ -231,7 +324,7 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
             onClick={() => setDrawer(false)}
             className="absolute inset-0 bg-black/40"
           />
-          <div className="absolute inset-y-0 left-0 w-[280px] bg-surface shadow-xl">
+          <div className="absolute inset-y-3 left-3 w-[280px] rounded-[28px] border border-[#e8e8e8] bg-surface shadow-xl">
             <button
               type="button"
               onClick={() => setDrawer(false)}
@@ -251,8 +344,8 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:overflow-hidden">
-        <header className="shrink-0 px-3 pt-3 lg:px-5 lg:pt-4">
-          <div className="flex h-[62px] items-center gap-3 rounded-[20px] bg-surface px-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] lg:px-5">
+        <header className="shrink-0 px-3 pt-2.5 lg:px-4 lg:pt-3">
+          <div className="shadow-header flex h-[54px] items-center gap-2.5 rounded-[18px] bg-surface px-3 lg:px-4">
             <button
               type="button"
               onClick={() => setDrawer(true)}
@@ -269,18 +362,28 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                 aria-label="Back to upload"
                 className={cn(
                   TOP_BAR_CONTROL,
-                  "hidden shadow-[0_1px_4px_rgba(0,0,0,0.10)] hover:bg-surface-muted lg:grid",
+                  "hidden hover:bg-surface-muted lg:grid",
                 )}
               >
                 <ArrowLeft className="h-[19px] w-[19px]" strokeWidth={2.2} />
               </button>
             ) : (
-              <div className="hidden h-9 w-9 lg:block" />
+              <button
+                type="button"
+                title={`Back — ${OUT_OF_SCOPE}`}
+                className={cn(
+                  TOP_BAR_CONTROL,
+                  TOP_BAR_INERT,
+                  "hidden lg:grid",
+                )}
+              >
+                <ArrowLeft className="h-[19px] w-[19px]" strokeWidth={2.2} />
+              </button>
             )}
 
             <div className="flex min-w-0 items-center gap-2 text-ink-soft">
               <Clipboard className="hidden h-[19px] w-[19px] shrink-0 lg:block" strokeWidth={1.9} />
-              <span className="truncate text-[16px] font-medium">{crumb}</span>
+              <span className="truncate text-[15px] font-medium">{crumb}</span>
             </div>
 
             <div className="ml-auto flex items-center gap-1.5 lg:gap-3">
@@ -323,10 +426,10 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                   "flex items-center gap-2 rounded-full py-1 pl-1 pr-1 transition hover:bg-surface-muted lg:pr-2",
                 )}
               >
-                <span className="grid h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-muted">
+                <span className="grid h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-muted ring-1 ring-black/5">
                   <ArtworkImage
                     src={USER_AVATAR}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover object-center"
                     fallback={
                       <span className="grid h-full w-full place-items-center bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900">
                         {TEACHER.initials}
@@ -334,14 +437,14 @@ export function AppShell({ crumb, onBack, children }: AppShellProps) {
                     }
                   />
                 </span>
-                <span className="hidden text-[15px] font-semibold lg:inline">{TEACHER.name}</span>
+                <span className="hidden text-[14px] font-semibold lg:inline">{TEACHER.name}</span>
                 <ChevronDown className="hidden h-4 w-4 text-ink-faint lg:block" />
               </button>
             </div>
           </div>
         </header>
 
-        <main className="min-h-0 flex-1 lg:overflow-hidden">{children}</main>
+        <main className="canvas-gradient min-h-0 flex-1 lg:overflow-hidden">{children}</main>
       </div>
     </div>
   );

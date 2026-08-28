@@ -1,0 +1,5 @@
+<svg width="35" height="40" viewBox="0 0 35 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M0 3.5C0 1.57 1.57 0 3.5 0H21.5L35 13.5V36.5C35 38.43 33.43 40 31.5 40H3.5C1.57 40 0 38.43 0 36.5V3.5Z" fill="#3B82F6"/>
+  <path d="M21.5 0L35 13.5H24.5C22.57 13.5 21 11.93 21 10V0H21.5Z" fill="#2563EB"/>
+  <text x="17.5" y="29" text-anchor="middle" fill="white" font-size="7.5" font-weight="700" font-family="Arial, Helvetica, sans-serif">IMG</text>
+</svg>

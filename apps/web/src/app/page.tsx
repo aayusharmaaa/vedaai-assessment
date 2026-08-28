@@ -128,7 +128,11 @@ export default function Page() {
   const crumb = "Exams";
 
   return (
-    <AppShell crumb={crumb} onBack={phase === "upload" ? undefined : reset}>
+    <AppShell
+      crumb={crumb}
+      onBack={phase === "upload" ? undefined : reset}
+      defaultCollapsed={phase === "processing"}
+    >
       {phase === "upload" && (
         <UploadScreen onStart={start} onSample={startSample} hasApiKey={hasApiKey} />
       )}
