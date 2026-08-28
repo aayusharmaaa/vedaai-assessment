@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Eye, EyeOff, Minus, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
@@ -31,22 +31,8 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
 
   const [zoomIndex, setZoomIndex] = useState(2); // 100%
   const [currentPage, setCurrentPage] = useState(0);
-  const [showAll, setShowAll] = useState(false);
 
   const zoom = ZOOM_STEPS[zoomIndex];
-
-  /** Every region on the sheet, tagged with the block that owns it. */
-  const allRegions = useMemo(() => {
-    const map = new Map<number, { blockId: string; region: Region }[]>();
-    for (const b of blocks) {
-      for (const r of b.regions) {
-        const list = map.get(r.page) ?? [];
-        list.push({ blockId: b.id, region: r });
-        map.set(r.page, list);
-      }
-    }
-    return map;
-  }, [blocks]);
 
   const targetByPage = useMemo(() => {
     const map = new Map<number, { region: Region; order: number }[]>();
@@ -110,16 +96,6 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
       <header className="flex shrink-0 flex-wrap items-center gap-2 bg-ink px-3 py-2.5 text-white lg:px-4">
         <h2 className="mr-auto text-[16px] font-bold lg:text-[18px]">Answer Sheet</h2>
 
-        <button
-          type="button"
-          onClick={() => setShowAll((v) => !v)}
-          title={showAll ? "Hide all detected regions" : "Show all detected regions"}
-          className="flex h-9 items-center gap-1.5 rounded-full bg-white/10 px-3 text-[13px] font-medium transition hover:bg-white/20"
-        >
-          {showAll ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          <span className="hidden sm:inline">All regions</span>
-        </button>
-
         <div className="flex h-9 items-center gap-1 rounded-full bg-white/10 px-1.5">
           <button
             type="button"
@@ -177,7 +153,6 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
         <div className="mx-auto space-y-4" style={{ width: `${zoom}%`, maxWidth: `${zoom}%` }}>
           {pages.map((page, pageIndex) => {
             const targets = targetByPage.get(pageIndex) ?? [];
-            const faint = showAll ? (allRegions.get(pageIndex) ?? []) : [];
 
             return (
               <div
@@ -194,27 +169,6 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
                   className="block w-full select-none"
                   draggable={false}
                 />
-
-                {/* Every detected region, shown on demand for transparency. */}
-                {faint.map(({ blockId, region }, i) => {
-                  if (targets.some((t) => t.region === region)) return null;
-
-                  return (
-                    <button
-                      key={`${blockId}-${i}`}
-                      type="button"
-                      onClick={() => onSelectBlock?.(blockId)}
-                      title="Jump to this answer"
-                      style={{
-                        left: `${region.bbox.x * 100}%`,
-                        top: `${region.bbox.y * 100}%`,
-                        width: `${region.bbox.w * 100}%`,
-                        height: `${region.bbox.h * 100}%`,
-                      }}
-                      className="absolute rounded-md border-2 border-dashed border-ink/25 bg-ink/[0.04] transition hover:border-accent hover:bg-accent/10"
-                    />
-                  );
-                })}
 
                 {/* The selected answer. */}
                 {targets.map(({ region, order }) => (
