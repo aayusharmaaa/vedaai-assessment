@@ -131,7 +131,8 @@ export default function Page() {
     <AppShell
       crumb={crumb}
       onBack={phase === "upload" ? undefined : reset}
-      defaultCollapsed={phase === "processing"}
+      defaultCollapsed={phase !== "upload"}
+      hideHeader={phase === "review"}
     >
       {phase === "upload" && (
         <UploadScreen onStart={start} onSample={startSample} hasApiKey={hasApiKey} />

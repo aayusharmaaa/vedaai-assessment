@@ -67,7 +67,7 @@ export function ReviewScreen({ data, answerPages }: ReviewScreenProps) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-3 lg:p-5 lg:pt-4">
+    <div className="flex h-full min-h-0 flex-col gap-3 p-3 lg:p-5">
       {/* Mobile tab switcher, mirroring the design's pill control. */}
       <div className="shrink-0 lg:hidden">
         <div className="flex rounded-full bg-surface p-1">

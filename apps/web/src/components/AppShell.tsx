@@ -290,10 +290,18 @@ export interface AppShellProps {
   onBack?: () => void;
   /** Default collapse state for desktop sidebar. */
   defaultCollapsed?: boolean;
+  /** Review layout drops the top chrome bar. */
+  hideHeader?: boolean;
   children: React.ReactNode;
 }
 
-export function AppShell({ crumb, onBack, defaultCollapsed = false, children }: AppShellProps) {
+export function AppShell({
+  crumb,
+  onBack,
+  defaultCollapsed = false,
+  hideHeader = false,
+  children,
+}: AppShellProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [drawer, setDrawer] = useState(false);
 
@@ -344,6 +352,7 @@ export function AppShell({ crumb, onBack, defaultCollapsed = false, children }: 
       )}
 
       <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:overflow-hidden">
+        {!hideHeader && (
         <header className="shrink-0 px-3 pt-2.5 lg:px-4 lg:pt-3">
           <div className="shadow-header flex h-[54px] items-center gap-2.5 rounded-[18px] bg-surface px-3 lg:px-4">
             <button
@@ -443,6 +452,7 @@ export function AppShell({ crumb, onBack, defaultCollapsed = false, children }: 
             </div>
           </div>
         </header>
+        )}
 
         <main className="canvas-gradient min-h-0 flex-1 lg:overflow-hidden">{children}</main>
       </div>
