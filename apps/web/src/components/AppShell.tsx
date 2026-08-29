@@ -8,7 +8,6 @@ import {
   HelpCircle,
   Menu,
   Settings,
-  Sparkles,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -49,6 +48,9 @@ const SIDEBAR_EXPAND = "/sidebar-expand.png";
 
 /** Full wordmark from Figma export. */
 const VEDAAI_LOGO = "/vedaai-logo.png";
+
+/** AI Teacher's Toolkit pill badge from Figma export. */
+const AI_TOOLKIT_LOGO = "/ai-toolkit-button.png";
 
 /** The signed-in teacher. Static: the brief specifies no authentication. */
 const TEACHER = { name: "Madhur Rastogi", initials: "MR" };
@@ -210,17 +212,20 @@ function SidebarBody({
       </div>
 
       {!collapsed && (
-      <button
-        type="button"
-        onClick={onNavigate}
-        title={`AI Teacher's Toolkit — ${OUT_OF_SCOPE}`}
-        className="group mt-7 flex h-[46px] w-full cursor-default items-center justify-center gap-2 rounded-full bg-[#1a1a1a] px-4 text-white shadow-[0_0_0_1px_#ff5623,0_0_14px_rgba(255,86,35,0.22)] ring-[1.5px] ring-[#ff5623]/90 transition"
-      >
-        <Sparkles className="h-[17px] w-[17px] shrink-0 text-white" strokeWidth={2} />
-        <span className="font-bricolage text-[15px] font-semibold tracking-[-0.02em] whitespace-nowrap">
-          AI Teacher&apos;s Toolkit
-        </span>
-      </button>
+        <button
+          type="button"
+          onClick={onNavigate}
+          title={`AI Teacher's Toolkit — ${OUT_OF_SCOPE}`}
+          className="group mt-9 block w-full cursor-default overflow-visible py-1 leading-none transition"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={AI_TOOLKIT_LOGO}
+            alt="AI Teacher's Toolkit"
+            draggable={false}
+            className="block w-full h-auto"
+          />
+        </button>
       )}
 
       <nav className={cn("flex flex-col", collapsed ? "mt-4 items-center gap-1" : "mt-8 gap-1.5")}>
