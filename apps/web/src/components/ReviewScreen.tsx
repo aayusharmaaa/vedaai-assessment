@@ -55,8 +55,6 @@ export function ReviewScreen({ data, answerPages }: ReviewScreenProps) {
 
   const handleSelect = (next: Selection) => {
     setSelected(next);
-    // On mobile the panels are tabs, so follow the click over to the sheet.
-    if (window.matchMedia("(max-width: 1023px)").matches) setTab("sheet");
   };
 
   const handleSelectBlock = (blockId: string) => {
@@ -67,10 +65,17 @@ export function ReviewScreen({ data, answerPages }: ReviewScreenProps) {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 p-3 lg:p-5">
-      {/* Mobile tab switcher, mirroring the design's pill control. */}
+    <div className="flex h-full min-h-0 flex-col gap-3 px-3 pb-4 pt-1 lg:p-5">
+      {/* Mobile tab switcher — sliding pill inside a light track. */}
       <div className="shrink-0 lg:hidden">
-        <div className="flex rounded-full bg-surface p-1">
+        <div className="relative flex rounded-full bg-[#e8e8ec] p-1">
+          <span
+            aria-hidden
+            className={cn(
+              "pointer-events-none absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-ink shadow-[0_2px_10px_rgba(0,0,0,0.22)] transition-transform duration-200 ease-out",
+              tab === "sheet" && "translate-x-full",
+            )}
+          />
           {(
             [
               ["questions", "Questions"],
@@ -82,8 +87,8 @@ export function ReviewScreen({ data, answerPages }: ReviewScreenProps) {
               type="button"
               onClick={() => setTab(key)}
               className={cn(
-                "flex-1 rounded-full py-2.5 text-[15px] font-semibold transition",
-                tab === key ? "bg-ink text-white" : "text-ink-soft",
+                "relative z-10 flex-1 rounded-full py-2.5 text-[15px] font-semibold transition-colors duration-200",
+                tab === key ? "text-white" : "text-ink",
               )}
             >
               {label}
@@ -93,11 +98,23 @@ export function ReviewScreen({ data, answerPages }: ReviewScreenProps) {
       </div>
 
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
-        <div className={cn("min-h-0", tab === "questions" ? "block" : "hidden", "lg:block")}>
+        <div
+          className={cn(
+            "min-h-0",
+            tab === "questions" ? "block" : "hidden",
+            "lg:block",
+          )}
+        >
           <QuestionList data={data} selected={selected} onSelect={handleSelect} />
         </div>
 
-        <div className={cn("min-h-0", tab === "sheet" ? "block" : "hidden", "lg:block")}>
+        <div
+          className={cn(
+            "min-h-0",
+            tab === "sheet" ? "flex min-h-[70vh] flex-col" : "hidden",
+            "lg:flex lg:min-h-0",
+          )}
+        >
           <AnswerViewer
             pages={answerPages}
             blocks={data.answerBlocks}

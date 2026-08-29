@@ -91,64 +91,80 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
 
   const orphan = target?.tone === "orphan";
 
+  const zoomControls = (
+    <div className="flex h-9 items-center gap-1 rounded-full bg-white/10 px-1.5">
+      <button
+        type="button"
+        onClick={() => setZoomIndex((i) => Math.max(i - 1, 0))}
+        disabled={zoomIndex === 0}
+        aria-label="Zoom out"
+        className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
+      >
+        <Minus className="h-4 w-4" />
+      </button>
+      <span className="min-w-[46px] text-center text-[13px] font-semibold tabular-nums">
+        {zoom}%
+      </span>
+      <button
+        type="button"
+        onClick={() => setZoomIndex((i) => Math.min(i + 1, ZOOM_STEPS.length - 1))}
+        disabled={zoomIndex === ZOOM_STEPS.length - 1}
+        aria-label="Zoom in"
+        className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
+      >
+        <Plus className="h-4 w-4" />
+      </button>
+    </div>
+  );
+
+  const pageControls = (
+    <div className="flex h-9 items-center justify-center gap-1 rounded-full bg-white/10 px-1.5">
+      <button
+        type="button"
+        onClick={() => goToPage(Math.max(currentPage - 1, 0))}
+        disabled={currentPage === 0}
+        aria-label="Previous page"
+        className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <span className="px-2 text-[13px] font-semibold tabular-nums">
+        Page {currentPage + 1} of {pages.length}
+      </span>
+      <button
+        type="button"
+        onClick={() => goToPage(Math.min(currentPage + 1, pages.length - 1))}
+        disabled={currentPage === pages.length - 1}
+        aria-label="Next page"
+        className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+
   return (
-    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] bg-surface">
-      <header className="flex shrink-0 flex-wrap items-center gap-2 bg-ink px-3 py-2.5 text-white lg:px-4">
-        <h2 className="mr-auto text-[16px] font-bold lg:text-[18px]">Answer Sheet</h2>
-
-        <div className="flex h-9 items-center gap-1 rounded-full bg-white/10 px-1.5">
-          <button
-            type="button"
-            onClick={() => setZoomIndex((i) => Math.max(i - 1, 0))}
-            disabled={zoomIndex === 0}
-            aria-label="Zoom out"
-            className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
-          >
-            <Minus className="h-4 w-4" />
-          </button>
-          <span className="min-w-[46px] text-center text-[13px] font-semibold tabular-nums">
-            {zoom}%
-          </span>
-          <button
-            type="button"
-            onClick={() => setZoomIndex((i) => Math.min(i + 1, ZOOM_STEPS.length - 1))}
-            disabled={zoomIndex === ZOOM_STEPS.length - 1}
-            aria-label="Zoom in"
-            className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] bg-ink lg:bg-surface">
+      {/* Mobile: dark chrome with title + zoom, then a separate pagination bar. */}
+      <header className="shrink-0 bg-ink px-3 pb-2 pt-3 text-white lg:hidden">
+        <div className="flex items-center gap-2">
+          <h2 className="mr-auto text-[16px] font-bold">Answer Sheet</h2>
+          {zoomControls}
         </div>
+        <div className="mt-2.5">{pageControls}</div>
+      </header>
 
-        <div className="flex h-9 items-center gap-1 rounded-full bg-white/10 px-1.5">
-          <button
-            type="button"
-            onClick={() => goToPage(Math.max(currentPage - 1, 0))}
-            disabled={currentPage === 0}
-            aria-label="Previous page"
-            className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="px-1 text-[13px] font-semibold tabular-nums">
-            Page {currentPage + 1} of {pages.length}
-          </span>
-          <button
-            type="button"
-            onClick={() => goToPage(Math.min(currentPage + 1, pages.length - 1))}
-            disabled={currentPage === pages.length - 1}
-            aria-label="Next page"
-            className="grid h-7 w-7 place-items-center rounded-full transition hover:bg-white/20 disabled:opacity-40"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+      {/* Desktop: single header row with all controls. */}
+      <header className="hidden shrink-0 flex-wrap items-center gap-2 bg-ink px-4 py-2.5 text-white lg:flex">
+        <h2 className="mr-auto text-[18px] font-bold">Answer Sheet</h2>
+        {zoomControls}
+        {pageControls}
       </header>
 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="min-h-0 flex-1 overflow-auto scrollbar-slim bg-[#3a3a3f] p-3"
+        className="min-h-0 flex-1 overflow-auto scrollbar-slim bg-[#3a3a3f] p-3 lg:rounded-none"
       >
         <div className="mx-auto space-y-4" style={{ width: `${zoom}%`, maxWidth: `${zoom}%` }}>
           {pages.map((page, pageIndex) => {

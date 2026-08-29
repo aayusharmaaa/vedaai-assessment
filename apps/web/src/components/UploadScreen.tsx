@@ -190,15 +190,21 @@ function DropZone({
 export interface UploadScreenProps {
   onStart: (questionPaper: File[], answerSheet: File[]) => void;
   onSample: () => void;
+  /** Fired when both upload slots have valid files attached. */
+  onReadyChange?: (ready: boolean) => void;
   /** False when GEMINI_API_KEY is missing, so we can say so up front. */
   hasApiKey: boolean;
 }
 
-export function UploadScreen({ onStart, onSample, hasApiKey }: UploadScreenProps) {
+export function UploadScreen({ onStart, onSample, onReadyChange, hasApiKey }: UploadScreenProps) {
   const [qp, setQp] = useState<Slot>(EMPTY);
   const [as, setAs] = useState<Slot>(EMPTY);
 
   const ready = qp.files.length > 0 && as.files.length > 0 && !qp.error && !as.error;
+
+  useEffect(() => {
+    onReadyChange?.(ready);
+  }, [ready, onReadyChange]);
 
   const makeHandler =
     (setter: React.Dispatch<React.SetStateAction<Slot>>) => (incoming: File[]) => {

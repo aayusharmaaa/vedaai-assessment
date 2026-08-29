@@ -31,7 +31,7 @@ function splitNumber(q: ExtractedQuestion): { main: string; sub: string | null }
   return { main: String(n), sub: sub || null };
 }
 
-function MarksPill({ result }: { result: MappedResult }) {
+function MarksPill({ result, compact = false }: { result: MappedResult; compact?: boolean }) {
   const g = result.grade;
   if (!g) return null;
 
@@ -49,11 +49,12 @@ function MarksPill({ result }: { result: MappedResult }) {
   return (
     <span
       className={cn(
-        "shrink-0 rounded-lg px-2.5 py-1 text-[14px] font-bold tabular-nums",
+        "shrink-0 rounded-md font-bold tabular-nums",
+        compact ? "px-2 py-0.5 text-[13px]" : "px-2.5 py-1 text-[14px]",
         tone,
       )}
     >
-      {g.awarded} / {g.max}
+      {`${g.awarded} / ${g.max}`}
     </span>
   );
 }
@@ -69,8 +70,8 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
   let lastSection: string | null = null;
 
   return (
-    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] bg-surface">
-      <header className="flex shrink-0 items-center gap-3 px-4 pb-3 pt-4 lg:px-5">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden lg:rounded-[22px] lg:bg-surface">
+      <header className="flex shrink-0 items-center gap-3 px-1 pb-3 pt-1 lg:px-5 lg:pt-4">
         <h2 className="text-[16px] font-bold leading-tight lg:text-[18px]">
           Extracted Questions{" "}
           <span className="font-medium text-ink-faint">(from question paper)</span>
@@ -78,13 +79,13 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
         <button
           type="button"
           onClick={() => setExpandAll((v) => !v)}
-          className="ml-auto shrink-0 rounded-full border border-line px-4 py-2 text-[13px] font-semibold transition hover:bg-surface-muted"
+          className="ml-auto hidden shrink-0 rounded-full border border-line px-4 py-2 text-[13px] font-semibold transition hover:bg-surface-muted lg:block"
         >
           {expandAll ? "Collapse All" : "Expand All"}
         </button>
       </header>
 
-      <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto scrollbar-slim px-4 pb-5 lg:px-5">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto scrollbar-slim px-1 pb-5 lg:space-y-2.5 lg:px-5">
         {data.results.map((result) => {
           const q = questionById.get(result.questionId);
           if (!q) return null;
@@ -99,17 +100,17 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
           return (
             <div key={q.id}>
               {showSection && (
-                <p className="px-1 pb-1.5 pt-3 text-[12px] font-bold uppercase tracking-wider text-ink-faint">
+                <p className="hidden px-1 pb-1.5 pt-3 text-[12px] font-bold uppercase tracking-wider text-ink-faint lg:block">
                   {q.section}
                 </p>
               )}
 
               <article
                 className={cn(
-                  "rounded-[18px] border-2 transition",
+                  "rounded-[16px] border border-[#ececef] bg-surface shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition lg:rounded-[18px] lg:border-2 lg:bg-[#fafafa] lg:shadow-none",
                   isSelected
-                    ? "border-accent bg-surface shadow-[0_2px_10px_rgba(255,87,34,0.12)]"
-                    : "border-transparent bg-[#fafafa] hover:border-line",
+                    ? "lg:border-accent lg:bg-surface lg:shadow-[0_2px_14px_rgba(255,86,35,0.14)]"
+                    : "lg:border-transparent lg:hover:border-line",
                   result.status !== "answered" && !isSelected && "opacity-95",
                 )}
               >
@@ -117,14 +118,36 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
                   type="button"
                   onClick={() => onSelect({ kind: "question", id: q.id })}
                   aria-expanded={open}
-                  className="w-full p-3.5 text-left lg:p-4"
+                  className="w-full px-4 py-3.5 text-left lg:p-4"
                 >
-                  <span className="flex flex-wrap items-center gap-x-3 gap-y-2.5 lg:flex-nowrap lg:items-start lg:gap-x-4">
+                  {/* Mobile: number + marks on top row, question text below. */}
+                  <span className="flex flex-col gap-2.5 lg:hidden">
+                    <span className="flex items-center gap-2">
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-[12px] font-bold text-white">
+                        {main}
+                      </span>
+                      {sub && (
+                        <span className="-ml-0.5 shrink-0 text-[13px] font-bold text-ink">{sub}.</span>
+                      )}
+                      <MarksPill result={result} compact />
+                      <ChevronDown
+                        className={cn(
+                          "ml-auto h-[18px] w-[18px] shrink-0 text-ink transition-transform duration-200",
+                          open && "rotate-180",
+                        )}
+                        strokeWidth={2.2}
+                      />
+                    </span>
+                    <span className="text-[14px] font-medium leading-[1.45] text-ink">{q.text}</span>
+                  </span>
+
+                  {/* Desktop: badge + question text + marks + chevron box. */}
+                  <span className="hidden flex-wrap items-center gap-x-3 gap-y-2.5 lg:flex lg:flex-nowrap lg:items-start lg:gap-x-4">
                     <span
                       className={cn(
                         "order-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-[13px] font-bold",
                         isSelected
-                          ? "bg-accent text-white"
+                          ? "bg-accent text-white shadow-[0_2px_10px_rgba(255,86,35,0.38)]"
                           : result.status === "answered"
                             ? "bg-ink text-white"
                             : "border-2 border-line bg-white text-ink-faint",
@@ -145,22 +168,25 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
 
                     <span className="order-2 ml-auto flex shrink-0 items-center gap-2 lg:order-3 lg:ml-0">
                       <MarksPill result={result} />
-                      <ChevronDown
-                        className={cn(
-                          "h-5 w-5 text-ink-faint transition-transform",
-                          open && "rotate-180",
-                        )}
-                      />
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#f0f0f0]">
+                        <ChevronDown
+                          className={cn(
+                            "h-[18px] w-[18px] text-ink-faint transition-transform duration-200",
+                            open && "rotate-180",
+                          )}
+                          strokeWidth={2.2}
+                        />
+                      </span>
                     </span>
                   </span>
                 </button>
 
                 {open && (
-                  <div className="px-3.5 pb-4 lg:px-4">
+                  <div className="px-4 pb-3.5 lg:px-4 lg:pb-4 lg:pt-0">
                     {result.status === "answered" && result.grade ? (
-                      <div className="rounded-2xl bg-surface-muted p-3.5">
-                        <p className="text-[13px] font-bold">AI Feedback</p>
-                        <p className="mt-1.5 text-[14px] leading-relaxed text-ink-soft">
+                      <div className="rounded-xl bg-[#f0f0f4] px-3.5 py-3 lg:rounded-2xl lg:bg-[#f0f0f4]">
+                        <p className="text-[13px] font-bold text-ink">AI Feedback</p>
+                        <p className="mt-1.5 text-[14px] leading-[1.5] text-ink-soft">
                           {result.grade.feedback}
                         </p>
                       </div>

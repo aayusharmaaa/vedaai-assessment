@@ -29,6 +29,7 @@ export default function Page() {
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [answerPages, setAnswerPages] = useState<PageImage[]>([]);
   const [hasApiKey, setHasApiKey] = useState(true);
+  const [filesReady, setFilesReady] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
   const lastRunRef = useRef<{ qp: File[]; as: File[] } | null>(null);
@@ -47,6 +48,16 @@ export default function Page() {
   }, []);
 
   useEffect(() => clearTimers, [clearTimers]);
+
+  /** Load bundled demo data from the URL without hitting the API. */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sample") !== "review") return;
+
+    setResult(sampleBundle.result as unknown as AssessmentResult);
+    setAnswerPages(sampleBundle.answerSheetPages as PageImage[]);
+    setPhase("review");
+  }, []);
 
   const start = useCallback(
     async (qp: File[], as: File[]) => {
@@ -115,6 +126,7 @@ export default function Page() {
     setProgress(IDLE);
     setResult(null);
     setAnswerPages([]);
+    setFilesReady(false);
   }, [clearTimers]);
 
   const retry = useCallback(() => {
@@ -132,10 +144,16 @@ export default function Page() {
       crumb={crumb}
       onBack={phase === "upload" ? undefined : reset}
       defaultCollapsed={phase !== "upload"}
-      hideHeader={phase === "review"}
+      mobileReviewHeader={phase === "review"}
+      hideSettings={filesReady || phase !== "upload"}
     >
       {phase === "upload" && (
-        <UploadScreen onStart={start} onSample={startSample} hasApiKey={hasApiKey} />
+        <UploadScreen
+          onStart={start}
+          onSample={startSample}
+          onReadyChange={setFilesReady}
+          hasApiKey={hasApiKey}
+        />
       )}
 
       {phase === "processing" && (

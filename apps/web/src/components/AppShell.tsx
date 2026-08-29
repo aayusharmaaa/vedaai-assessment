@@ -148,11 +148,13 @@ function SidebarBody({
   onToggle,
   onNavigate,
   showToggle = true,
+  hideSettings = false,
 }: {
   collapsed: boolean;
   onToggle: () => void;
   onNavigate?: () => void;
   showToggle?: boolean;
+  hideSettings?: boolean;
 }) {
   return (
     <div
@@ -244,6 +246,7 @@ function SidebarBody({
       </nav>
 
       <div className={cn("mt-auto pt-6", collapsed ? "flex w-full flex-col items-center gap-3" : "space-y-4")}>
+        {!hideSettings && (
         <button
           type="button"
           onClick={onNavigate}
@@ -256,6 +259,7 @@ function SidebarBody({
           <Settings className={cn(COLLAPSED_ICON, "shrink-0 text-[rgba(94,94,94,0.8)]")} strokeWidth={2} />
           {!collapsed && <span>Settings</span>}
         </button>
+        )}
         <SchoolCard compact={collapsed} />
         {collapsed && showToggle && (
           <button
@@ -290,9 +294,90 @@ export interface AppShellProps {
   onBack?: () => void;
   /** Default collapse state for desktop sidebar. */
   defaultCollapsed?: boolean;
-  /** Review layout drops the top chrome bar. */
+  /** Review layout drops the top chrome bar on desktop. */
   hideHeader?: boolean;
+  /** Mobile review screen uses a compact logo header instead of the breadcrumb bar. */
+  mobileReviewHeader?: boolean;
+  /** Hide the sidebar Settings item once both files are attached. */
+  hideSettings?: boolean;
   children: React.ReactNode;
+}
+
+function MobileReviewHeader({
+  onBack,
+  onOpenMenu,
+}: {
+  onBack?: () => void;
+  onOpenMenu: () => void;
+}) {
+  return (
+    <header className="shrink-0 px-3 pt-2.5 lg:hidden">
+      <div className="shadow-header flex h-[54px] items-center gap-2 rounded-[18px] bg-surface px-3">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Back to upload"
+            className={cn(TOP_BAR_CONTROL, "hover:bg-surface-muted")}
+          >
+            <ArrowLeft className="h-[19px] w-[19px]" strokeWidth={2.2} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            title={`Back — ${OUT_OF_SCOPE}`}
+            className={cn(TOP_BAR_CONTROL, TOP_BAR_INERT)}
+          >
+            <ArrowLeft className="h-[19px] w-[19px]" strokeWidth={2.2} />
+          </button>
+        )}
+
+        <div className="flex min-w-0 items-center gap-2">
+          <Wordmark compact />
+          <span className="font-bricolage truncate text-[18px] font-bold tracking-[-0.04em] text-ink">
+            VedaAI
+          </span>
+        </div>
+
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            aria-label="Notifications"
+            title={`Notifications — ${OUT_OF_SCOPE}`}
+            className={cn(TOP_BAR_CONTROL, TOP_BAR_INERT, "relative")}
+          >
+            <Bell className="h-[21px] w-[21px]" strokeWidth={1.8} />
+            <span className="absolute right-[7px] top-[7px] h-[7px] w-[7px] rounded-full bg-accent ring-2 ring-white" />
+          </button>
+
+          <button
+            type="button"
+            title={`${TEACHER.name} — ${OUT_OF_SCOPE}`}
+            className={cn(TOP_BAR_INERT, "grid h-9 w-9 shrink-0 overflow-hidden rounded-full bg-surface-muted ring-1 ring-black/5")}
+          >
+            <ArtworkImage
+              src={USER_AVATAR}
+              className="h-full w-full object-cover object-center"
+              fallback={
+                <span className="grid h-full w-full place-items-center bg-gradient-to-br from-amber-200 to-orange-300 text-[13px] font-bold text-orange-900">
+                  {TEACHER.initials}
+                </span>
+              }
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenMenu}
+            aria-label="Open menu"
+            className="grid h-9 w-9 place-items-center rounded-lg text-ink transition hover:bg-surface-muted"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
 }
 
 export function AppShell({
@@ -300,6 +385,8 @@ export function AppShell({
   onBack,
   defaultCollapsed = false,
   hideHeader = false,
+  mobileReviewHeader = false,
+  hideSettings = false,
   children,
 }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
@@ -319,7 +406,11 @@ export function AppShell({
         )}
       >
         <div className="h-full rounded-[28px] border border-[#e8e8e8] bg-surface shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
-          <SidebarBody collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+          <SidebarBody
+            collapsed={collapsed}
+            onToggle={() => setCollapsed((c) => !c)}
+            hideSettings={hideSettings}
+          />
         </div>
       </aside>
 
@@ -346,6 +437,7 @@ export function AppShell({
               onToggle={() => undefined}
               onNavigate={() => setDrawer(false)}
               showToggle={false}
+              hideSettings={hideSettings}
             />
           </div>
         </div>
@@ -353,7 +445,12 @@ export function AppShell({
 
       <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:overflow-hidden">
         {!hideHeader && (
-        <header className="shrink-0 px-3 pt-2.5 lg:px-4 lg:pt-3">
+        <header
+          className={cn(
+            "shrink-0 px-3 pt-2.5 lg:px-4 lg:pt-3",
+            mobileReviewHeader && "hidden lg:block",
+          )}
+        >
           <div className="shadow-header flex h-[54px] items-center gap-2.5 rounded-[18px] bg-surface px-3 lg:px-4">
             <button
               type="button"
@@ -452,6 +549,10 @@ export function AppShell({
             </div>
           </div>
         </header>
+        )}
+
+        {mobileReviewHeader && (
+          <MobileReviewHeader onBack={onBack} onOpenMenu={() => setDrawer(true)} />
         )}
 
         <main className="canvas-gradient min-h-0 flex-1 lg:overflow-hidden">{children}</main>
