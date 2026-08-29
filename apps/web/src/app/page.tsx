@@ -144,7 +144,7 @@ export default function Page() {
       crumb={crumb}
       onBack={phase === "upload" ? undefined : reset}
       defaultCollapsed={phase !== "upload"}
-      mobileReviewHeader={phase === "review"}
+      mobileReviewHeader
       hideSettings={filesReady || phase !== "upload"}
     >
       {phase === "upload" && (

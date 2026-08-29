@@ -26,7 +26,7 @@ const TEACHER_GRAPHIC = "/image.png";
 
 function TeacherBadge() {
   return (
-    <div className="relative mx-auto h-[168px] w-[168px] shrink-0 lg:h-[180px] lg:w-[180px]">
+    <div className="relative mx-auto h-[150px] w-[150px] shrink-0 lg:h-[180px] lg:w-[180px]">
       <ArtworkImage
         src={TEACHER_GRAPHIC}
         className="h-full w-full select-none object-contain"
@@ -130,8 +130,8 @@ function DropZone({
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={cn(
-        "shadow-card flex min-h-[156px] flex-col justify-center rounded-2xl border border-dashed p-3.5 transition",
-        dragging ? "border-accent bg-accent-tint" : "border-[#d1d5db] bg-surface",
+        "flex min-h-[162px] flex-col justify-center rounded-[20px] border-2 border-dashed border-[#9ca3af] bg-surface p-5 transition lg:min-h-[156px] lg:rounded-2xl lg:border lg:border-[#d1d5db] lg:p-3.5 lg:shadow-card",
+        dragging && "border-accent bg-accent-tint",
       )}
     >
       <input
@@ -170,13 +170,14 @@ function DropZone({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex flex-col items-center gap-2 py-2.5 text-center"
+          className="flex w-full flex-col items-center gap-3 py-1 text-center lg:gap-2 lg:py-2.5"
         >
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#f3f4f6]">
-            <Upload className="h-[18px] w-[18px] text-ink-soft" />
+          <span className="grid h-12 w-12 place-items-center rounded-xl bg-[#f3f4f6] lg:h-11 lg:w-11">
+            <Upload className="h-5 w-5 text-ink-soft lg:h-[18px] lg:w-[18px]" />
           </span>
-          <span className="font-bricolage text-[16px] font-bold">
-            Upload <span className="accent-mark font-bold">{title}</span>
+          <span className="font-bricolage text-[16px] font-bold leading-snug max-lg:whitespace-nowrap">
+            <span className="text-[#2b2b2b]">Upload </span>
+            <span className="font-bold text-accent lg:accent-mark">{title}</span>
           </span>
           <span className="text-[12px] text-ink-faint">Max 10MB</span>
         </button>
@@ -250,22 +251,29 @@ export function UploadScreen({ onStart, onSample, onReadyChange, hasApiKey }: Up
 
   return (
     <div className="h-full overflow-y-auto scrollbar-slim">
-      <div className="mx-auto flex min-h-full w-full max-w-[960px] flex-col items-center px-5 py-8 lg:justify-center lg:px-6 lg:py-10">
-        <div className="font-bricolage w-full text-center">
-          <h1 className="text-[22px] font-bold leading-[1.2] text-[#2b2b2b] sm:text-[28px] lg:whitespace-nowrap lg:text-[40px]">
-            Upload{" "}
-            <span className="accent-mark font-bold">Question Paper &amp; Answer Sheets</span>
+      <div className="mx-auto flex min-h-full w-full max-w-[960px] flex-col items-center px-5 pb-6 pt-2 lg:justify-center lg:px-6 lg:py-10">
+        <div className="font-bricolage mt-5 w-full max-w-[340px] text-center lg:mt-0 lg:max-w-none">
+          <h1 className="text-[26px] font-bold leading-[1.22] tracking-[-0.04em] text-[#2b2b2b] sm:text-[28px] lg:text-[40px] lg:leading-[1.2]">
+            <span className="lg:hidden">
+              Upload Question Paper
+              <br />
+              &amp; Answer Sheets
+            </span>
+            <span className="hidden lg:inline">
+              Upload{" "}
+              <span className="accent-mark font-bold">Question Paper &amp; Answer Sheets</span>
+            </span>
           </h1>
-          <p className="mt-3 text-[17px] font-normal leading-[1.4] text-[#303030] lg:text-[20px]">
+          <p className="mt-3 hidden text-[17px] font-normal leading-[1.4] text-[#303030] lg:block lg:text-[20px]">
             Upload both files to get started
           </p>
         </div>
 
-        <div className="my-3 lg:my-4">
+        <div className="my-4 lg:my-4">
           <TeacherBadge />
         </div>
 
-        <div className="grid w-full gap-2.5 lg:grid-cols-2 lg:gap-3">
+        <div className="grid w-full gap-3 lg:grid-cols-2 lg:gap-3">
           <DropZone
             id="question-paper"
             title="Question Paper"
@@ -291,7 +299,7 @@ export function UploadScreen({ onStart, onSample, onReadyChange, hasApiKey }: Up
           disabled={!ready}
           onClick={() => onStart(qp.files, as.files)}
           className={cn(
-            "mt-5 flex h-[44px] min-w-[188px] items-center justify-center gap-2 rounded-full px-7 text-[15px] font-semibold transition",
+            "mt-5 flex h-[46px] w-full items-center justify-center gap-2 rounded-full px-7 font-bricolage text-[16px] font-semibold tracking-[-0.02em] transition lg:mt-5 lg:h-[44px] lg:w-auto lg:min-w-[188px] lg:text-[15px]",
             ready
               ? "bg-ink text-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] hover:bg-black"
               : "cursor-not-allowed bg-[#c9c9cd] text-white",
@@ -301,7 +309,7 @@ export function UploadScreen({ onStart, onSample, onReadyChange, hasApiKey }: Up
           <ArrowRight className="h-4 w-4" />
         </button>
 
-        <p className="font-bricolage mt-2.5 text-center text-[14px] font-normal leading-[22px] tracking-[-0.06em] text-[rgba(94,94,94,0.8)] lg:whitespace-nowrap">
+        <p className="font-bricolage mt-2.5 hidden text-center text-[14px] font-normal leading-[22px] tracking-[-0.06em] text-[rgba(94,94,94,0.8)] lg:block lg:whitespace-nowrap">
           Once both files are uploaded, you&apos;ll able to map answers with questions
         </p>
 

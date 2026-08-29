@@ -145,13 +145,12 @@ export function AnswerViewer({ pages, blocks, target, onSelectBlock }: AnswerVie
 
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] bg-ink lg:bg-surface">
-      {/* Mobile: dark chrome with title + zoom, then a separate pagination bar. */}
-      <header className="shrink-0 bg-ink px-3 pb-2 pt-3 text-white lg:hidden">
-        <div className="flex items-center gap-2">
-          <h2 className="mr-auto text-[16px] font-bold">Answer Sheet</h2>
+      {/* Mobile: zoom + pagination on one row — tab already labels this view. */}
+      <header className="shrink-0 bg-ink px-3 py-2.5 text-white lg:hidden">
+        <div className="flex items-center justify-between gap-2">
           {zoomControls}
+          {pageControls}
         </div>
-        <div className="mt-2.5">{pageControls}</div>
       </header>
 
       {/* Desktop: single header row with all controls. */}

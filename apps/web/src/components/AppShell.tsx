@@ -296,7 +296,7 @@ export interface AppShellProps {
   defaultCollapsed?: boolean;
   /** Review layout drops the top chrome bar on desktop. */
   hideHeader?: boolean;
-  /** Mobile review screen uses a compact logo header instead of the breadcrumb bar. */
+  /** Mobile screens use a compact logo header instead of the breadcrumb bar. */
   mobileReviewHeader?: boolean;
   /** Hide the sidebar Settings item once both files are attached. */
   hideSettings?: boolean;
