@@ -72,9 +72,9 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
   return (
     <section className="flex h-full min-h-0 flex-col overflow-hidden lg:rounded-[22px] lg:bg-surface">
       <header className="flex shrink-0 items-center gap-3 px-1 pb-3 pt-1 lg:px-5 lg:pt-4">
-        <h2 className="text-[16px] font-bold leading-tight lg:text-[18px]">
+        <h2 className="text-[16px] font-bold leading-tight text-[#2b2b2b] lg:text-[18px] lg:text-ink">
           Extracted Questions{" "}
-          <span className="font-medium text-ink-faint">(from question paper)</span>
+          <span className="font-bold text-[#2b2b2b] lg:font-medium lg:text-ink-faint">(from question paper)</span>
         </h2>
         <button
           type="button"
@@ -127,18 +127,18 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
                         {main}
                       </span>
                       {sub && (
-                        <span className="-ml-0.5 shrink-0 text-[13px] font-bold text-ink">{sub}.</span>
+                        <span className="-ml-0.5 shrink-0 text-[13px] font-bold text-[#2b2b2b] lg:text-ink">{sub}.</span>
                       )}
                       <MarksPill result={result} compact />
                       <ChevronDown
                         className={cn(
-                          "ml-auto h-[18px] w-[18px] shrink-0 text-ink transition-transform duration-200",
+                          "ml-auto h-[18px] w-[18px] shrink-0 text-[#2b2b2b] transition-transform duration-200 lg:text-ink",
                           open && "rotate-180",
                         )}
                         strokeWidth={2.2}
                       />
                     </span>
-                    <span className="text-[14px] font-medium leading-[1.45] text-ink">{q.text}</span>
+                    <span className="text-[14px] font-medium leading-[1.45] text-[#2b2b2b] lg:text-ink">{q.text}</span>
                   </span>
 
                   {/* Desktop: badge + question text + marks + chevron box. */}
@@ -185,20 +185,20 @@ export function QuestionList({ data, selected, onSelect }: QuestionListProps) {
                   <div className="px-4 pb-3.5 lg:px-4 lg:pb-4 lg:pt-0">
                     {result.status === "answered" && result.grade ? (
                       <div className="rounded-xl bg-[#f0f0f4] px-3.5 py-3 lg:rounded-2xl lg:bg-[#f0f0f4]">
-                        <p className="text-[13px] font-bold text-ink">AI Feedback</p>
-                        <p className="mt-1.5 text-[14px] leading-[1.5] text-ink-soft">
+                        <p className="text-[13px] font-bold text-[#2b2b2b] lg:text-ink">AI Feedback</p>
+                        <p className="mt-1.5 text-[14px] leading-[1.5] text-[#2b2b2b] lg:text-ink-soft">
                           {result.grade.feedback}
                         </p>
                       </div>
                     ) : (
                       <div className="rounded-2xl bg-surface-muted p-3.5">
-                        <p className="flex items-center gap-2 text-[13px] font-bold text-ink-soft">
+                        <p className="flex items-center gap-2 text-[13px] font-bold text-[#2b2b2b] lg:text-ink-soft">
                           <CircleSlash className="h-4 w-4" />
                           {result.status === "blank"
                             ? "Labelled on the sheet but left blank"
                             : "No answer for this question was found on the sheet"}
                         </p>
-                        <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-faint">
+                        <p className="mt-1.5 text-[13.5px] leading-relaxed text-[#2b2b2b] lg:text-ink-faint">
                           Nothing on the answer sheet could be attributed to Q{q.number}, so it
                           scores 0 of {result.grade?.max ?? q.maxMarks ?? 1}.
                         </p>

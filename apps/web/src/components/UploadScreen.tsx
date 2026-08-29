@@ -130,7 +130,7 @@ function DropZone({
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       className={cn(
-        "flex min-h-[162px] flex-col justify-center rounded-[20px] border-2 border-dashed border-[#9ca3af] bg-surface p-5 transition lg:min-h-[156px] lg:rounded-2xl lg:border lg:border-[#d1d5db] lg:p-3.5 lg:shadow-card",
+        "flex min-h-[162px] flex-col justify-center rounded-2xl border-2 border-dashed border-[#9ca3af] bg-surface p-5 transition lg:min-h-[156px] lg:p-3.5",
         dragging && "border-accent bg-accent-tint",
       )}
     >
@@ -273,25 +273,27 @@ export function UploadScreen({ onStart, onSample, onReadyChange, hasApiKey }: Up
           <TeacherBadge />
         </div>
 
-        <div className="grid w-full gap-3 lg:grid-cols-2 lg:gap-3">
-          <DropZone
-            id="question-paper"
-            title="Question Paper"
-            slot={qp}
-            onFiles={makeHandler(setQp)}
-            onClear={(i) =>
-              setQp((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
-            }
-          />
-          <DropZone
-            id="answer-sheet"
-            title="Answer Sheet"
-            slot={as}
-            onFiles={makeHandler(setAs)}
-            onClear={(i) =>
-              setAs((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
-            }
-          />
+        <div className="w-full lg:rounded-[20px] lg:bg-surface lg:p-4 lg:shadow-card">
+          <div className="grid w-full gap-3 lg:grid-cols-2 lg:gap-3">
+            <DropZone
+              id="question-paper"
+              title="Question Paper"
+              slot={qp}
+              onFiles={makeHandler(setQp)}
+              onClear={(i) =>
+                setQp((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
+              }
+            />
+            <DropZone
+              id="answer-sheet"
+              title="Answer Sheet"
+              slot={as}
+              onFiles={makeHandler(setAs)}
+              onClear={(i) =>
+                setAs((s) => ({ ...s, files: s.files.filter((_, x) => x !== i), pages: null }))
+              }
+            />
+          </div>
         </div>
 
         <button
